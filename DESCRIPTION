@@ -1,0 +1,47 @@
+Package: geoaddSAE2
+Type: Package
+Title: Geoadditive Small Area Estimation for Area-Level Model
+Version: 0.1.0
+Authors@R: c(
+    person(
+      given = "Amalyah Rizky Khairunnisa", 
+      family = "Sutarto",
+      email = "222212489@stis.ac.id",
+      role = c("aut", "cre")),
+    person(
+      given = "Novi Hidayat",
+      family = "Pusponegoro",
+      email = "novie@stis.ac.id",
+      role = c("aut", "ths")
+    )
+  )
+Description: Fits area-level geoadditive small area estimation (SAE)
+    models by extending the Fay-Herriot area-level model with linear,
+    nonlinear, and spatial effects. The Fay-Herriot model is described by
+    Fay and Herriot (1979) <doi:10.1080/01621459.1979.10482505>.
+    Geoadditive models combine nonlinear covariate effects and spatial
+    variation as described by Kammann and Wand (2003)
+    <doi:10.1111/1467-9876.00385>, while their application to small area
+    estimation is discussed by Pusponegoro et al. (2019)
+    <doi:10.21108/JDSA.2019.2.15>. Nonlinear covariate effects are represented
+    using penalized splines, while spatial effects are represented using a
+    smooth function of geographic coordinates. Models are estimated using
+    restricted maximum likelihood (REML), and mean squared error (MSE) is
+    estimated using a parametric bootstrap. The package also provides
+    comparisons with the Fay-Herriot and spatial Fay-Herriot (SFH) models.
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+Depends: R (>= 3.5.0)
+Imports: mgcv, sae, stats
+Config/roxygen2/version: 8.1.0
+NeedsCompilation: no
+Packaged: 2026-09-22 08:16:08 UTC; alya
+Author: Amalyah Rizky Khairunnisa Sutarto [aut, cre],
+  Novi Hidayat Pusponegoro [aut, ths]
+Maintainer: Amalyah Rizky Khairunnisa Sutarto <222212489@stis.ac.id>
+Repository: CRAN
+Date/Publication: 2026-09-30 11:40:09 UTC
