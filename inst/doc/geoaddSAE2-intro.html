@@ -393,122 +393,121 @@ coordinates <code>lat</code>/<code>lon</code>.</p>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="at">vardir    =</span> vardir,</span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">nonlinear =</span> <span class="st">&quot;x2&quot;</span>,</span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="at">spatial   =</span> <span class="fu">c</span>(<span class="st">&quot;lat&quot;</span>, <span class="st">&quot;lon&quot;</span>),</span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="at">bootstrap =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>  <span class="at">B         =</span> <span class="dv">50</span>,</span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>  <span class="at">seed      =</span> <span class="dv">1</span></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>)</span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>fit</span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; === Geoadditive Small Area Estimation Model ===</span></span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; Formula (linear) : y ~ x1 </span></span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt; Nonlinear terms  : x2 </span></span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; Spatial terms    : lat, lon </span></span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt; Number of Areas  : 100 </span></span>
-<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt;         area direct_est direct_mse geoadditive_est geoadditive_mse</span></span>
-<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co">#&gt; 1    Area_01 5.75116528 0.06666667       6.5584718     0.021150604</span></span>
-<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co">#&gt; 2    Area_02 0.04273984 0.04000000      -0.2194713     0.033486455</span></span>
-<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co">#&gt; 3    Area_03 6.61571316 0.04166667       4.6159626     0.013043208</span></span>
-<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="co">#&gt; 4    Area_04 6.23637659 0.03571429       5.2761556     0.024534637</span></span>
-<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="co">#&gt; 5    Area_05 3.90330728 0.08333333       5.6670604     0.037904679</span></span>
-<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="co">#&gt; 6    Area_06 4.18112746 0.02380952       5.0320352     0.016834623</span></span>
-<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a><span class="co">#&gt; 7    Area_07 5.11069626 0.02380952       4.9811352     0.014053099</span></span>
-<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a><span class="co">#&gt; 8    Area_08 1.26974831 0.05000000       1.5226914     0.026653680</span></span>
-<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a><span class="co">#&gt; 9    Area_09 2.53503718 0.02222222       3.5927593     0.016580653</span></span>
-<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a><span class="co">#&gt; 10   Area_10 6.37934945 0.05263158       5.0739790     0.019103575</span></span>
-<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a><span class="co">#&gt; 11   Area_11 1.94237636 0.03030303       3.1567750     0.015026321</span></span>
-<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a><span class="co">#&gt; 12   Area_12 6.16401327 0.02702703       6.0470741     0.014352974</span></span>
-<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a><span class="co">#&gt; 13   Area_13 3.21091033 0.02083333       2.8855341     0.010788376</span></span>
-<span id="cb2-34"><a href="#cb2-34" tabindex="-1"></a><span class="co">#&gt; 14   Area_14 2.64910648 0.03703704       2.1242307     0.030220000</span></span>
-<span id="cb2-35"><a href="#cb2-35" tabindex="-1"></a><span class="co">#&gt; 15   Area_15 1.96870917 0.03846154       3.3526977     0.018626148</span></span>
-<span id="cb2-36"><a href="#cb2-36" tabindex="-1"></a><span class="co">#&gt; 16   Area_16 4.02261620 0.03448276       4.2250664     0.029810333</span></span>
-<span id="cb2-37"><a href="#cb2-37" tabindex="-1"></a><span class="co">#&gt; 17   Area_17 6.62251124 0.05555556       5.8135386     0.025658514</span></span>
-<span id="cb2-38"><a href="#cb2-38" tabindex="-1"></a><span class="co">#&gt; 18   Area_18 1.78206408 0.05000000       1.8398888     0.031689509</span></span>
-<span id="cb2-39"><a href="#cb2-39" tabindex="-1"></a><span class="co">#&gt; 19   Area_19 3.67762650 0.05882353       4.5615501     0.026043168</span></span>
-<span id="cb2-40"><a href="#cb2-40" tabindex="-1"></a><span class="co">#&gt; 20   Area_20 4.53683605 0.07142857       3.8141823     0.032142336</span></span>
-<span id="cb2-41"><a href="#cb2-41" tabindex="-1"></a><span class="co">#&gt; 21   Area_21 6.54020334 0.02631579       6.4190328     0.015278202</span></span>
-<span id="cb2-42"><a href="#cb2-42" tabindex="-1"></a><span class="co">#&gt; 22   Area_22 4.17529738 0.06666667       3.3563247     0.023170666</span></span>
-<span id="cb2-43"><a href="#cb2-43" tabindex="-1"></a><span class="co">#&gt; 23   Area_23 3.61164478 0.05263158       5.0499082     0.018167386</span></span>
-<span id="cb2-44"><a href="#cb2-44" tabindex="-1"></a><span class="co">#&gt; 24   Area_24 3.26737137 0.02857143       3.4429183     0.013133334</span></span>
-<span id="cb2-45"><a href="#cb2-45" tabindex="-1"></a><span class="co">#&gt; 25   Area_25 4.31371129 0.05555556       2.8398809     0.016326903</span></span>
-<span id="cb2-46"><a href="#cb2-46" tabindex="-1"></a><span class="co">#&gt; 26   Area_26 4.29320168 0.05000000       4.4880609     0.027711808</span></span>
-<span id="cb2-47"><a href="#cb2-47" tabindex="-1"></a><span class="co">#&gt; 27   Area_27 4.79593009 0.06666667       5.6118172     0.040046917</span></span>
-<span id="cb2-48"><a href="#cb2-48" tabindex="-1"></a><span class="co">#&gt; 28   Area_28 1.39586453 0.02439024       1.3447014     0.020863228</span></span>
-<span id="cb2-49"><a href="#cb2-49" tabindex="-1"></a><span class="co">#&gt; 29   Area_29 1.75747607 0.04761905       2.0704647     0.013748396</span></span>
-<span id="cb2-50"><a href="#cb2-50" tabindex="-1"></a><span class="co">#&gt; 30   Area_30 7.03054359 0.03571429       5.2990814     0.023153900</span></span>
-<span id="cb2-51"><a href="#cb2-51" tabindex="-1"></a><span class="co">#&gt; 31   Area_31 5.71163406 0.02777778       5.5768790     0.022340726</span></span>
-<span id="cb2-52"><a href="#cb2-52" tabindex="-1"></a><span class="co">#&gt; 32   Area_32 4.26725955 0.02439024       2.9293680     0.015602263</span></span>
-<span id="cb2-53"><a href="#cb2-53" tabindex="-1"></a><span class="co">#&gt; 33   Area_33 4.06595513 0.02777778       5.5599192     0.014903131</span></span>
-<span id="cb2-54"><a href="#cb2-54" tabindex="-1"></a><span class="co">#&gt; 34   Area_34 5.35081995 0.02564103       5.4551451     0.017430229</span></span>
-<span id="cb2-55"><a href="#cb2-55" tabindex="-1"></a><span class="co">#&gt; 35   Area_35 1.61017708 0.07692308       2.2189151     0.034535550</span></span>
-<span id="cb2-56"><a href="#cb2-56" tabindex="-1"></a><span class="co">#&gt; 36   Area_36 5.85728459 0.03030303       5.0806900     0.018968088</span></span>
-<span id="cb2-57"><a href="#cb2-57" tabindex="-1"></a><span class="co">#&gt; 37   Area_37 4.01020285 0.02702703       4.3947065     0.025568021</span></span>
-<span id="cb2-58"><a href="#cb2-58" tabindex="-1"></a><span class="co">#&gt; 38   Area_38 4.60056997 0.08333333       4.6976748     0.045191711</span></span>
-<span id="cb2-59"><a href="#cb2-59" tabindex="-1"></a><span class="co">#&gt; 39   Area_39 4.25093185 0.02040816       4.6713304     0.012532009</span></span>
-<span id="cb2-60"><a href="#cb2-60" tabindex="-1"></a><span class="co">#&gt; 40   Area_40 4.61888304 0.06666667       6.4351168     0.018502707</span></span>
-<span id="cb2-61"><a href="#cb2-61" tabindex="-1"></a><span class="co">#&gt; 41   Area_41 2.05759723 0.02222222       2.2493178     0.015380445</span></span>
-<span id="cb2-62"><a href="#cb2-62" tabindex="-1"></a><span class="co">#&gt; 42   Area_42 4.02118521 0.02564103       3.1208296     0.015681542</span></span>
-<span id="cb2-63"><a href="#cb2-63" tabindex="-1"></a><span class="co">#&gt; 43   Area_43 6.88024386 0.05263158       6.1245959     0.072910354</span></span>
-<span id="cb2-64"><a href="#cb2-64" tabindex="-1"></a><span class="co">#&gt; 44   Area_44 1.56221280 0.02941176       2.7819417     0.014616352</span></span>
-<span id="cb2-65"><a href="#cb2-65" tabindex="-1"></a><span class="co">#&gt; 45   Area_45 5.98058025 0.02127660       5.7648721     0.008091791</span></span>
-<span id="cb2-66"><a href="#cb2-66" tabindex="-1"></a><span class="co">#&gt; 46   Area_46 5.96758672 0.02222222       4.6617281     0.015106086</span></span>
-<span id="cb2-67"><a href="#cb2-67" tabindex="-1"></a><span class="co">#&gt; 47   Area_47 8.32962309 0.02000000       7.8744444     0.013644239</span></span>
-<span id="cb2-68"><a href="#cb2-68" tabindex="-1"></a><span class="co">#&gt; 48   Area_48 1.43097959 0.02941176       2.7227587     0.014208174</span></span>
-<span id="cb2-69"><a href="#cb2-69" tabindex="-1"></a><span class="co">#&gt; 49   Area_49 1.01745484 0.07692308       2.8736794     0.034466187</span></span>
-<span id="cb2-70"><a href="#cb2-70" tabindex="-1"></a><span class="co">#&gt; 50   Area_50 6.88856129 0.04166667       4.3946852     0.024273463</span></span>
-<span id="cb2-71"><a href="#cb2-71" tabindex="-1"></a><span class="co">#&gt; 51   Area_51 3.68527035 0.03225806       4.0760400     0.021092538</span></span>
-<span id="cb2-72"><a href="#cb2-72" tabindex="-1"></a><span class="co">#&gt; 52   Area_52 4.67601131 0.03030303       5.0455598     0.015186498</span></span>
-<span id="cb2-73"><a href="#cb2-73" tabindex="-1"></a><span class="co">#&gt; 53   Area_53 2.50373745 0.02083333       3.9137410     0.012668616</span></span>
-<span id="cb2-74"><a href="#cb2-74" tabindex="-1"></a><span class="co">#&gt; 54   Area_54 2.63136965 0.02173913       3.2616952     0.013312870</span></span>
-<span id="cb2-75"><a href="#cb2-75" tabindex="-1"></a><span class="co">#&gt; 55   Area_55 3.18783384 0.04166667       4.0419625     0.023615521</span></span>
-<span id="cb2-76"><a href="#cb2-76" tabindex="-1"></a><span class="co">#&gt; 56   Area_56 7.87355569 0.04000000       7.5428429     0.011129045</span></span>
-<span id="cb2-77"><a href="#cb2-77" tabindex="-1"></a><span class="co">#&gt; 57   Area_57 7.12741366 0.03571429       6.6575681     0.019162342</span></span>
-<span id="cb2-78"><a href="#cb2-78" tabindex="-1"></a><span class="co">#&gt; 58   Area_58 5.65875629 0.05882353       4.6237529     0.025963958</span></span>
-<span id="cb2-79"><a href="#cb2-79" tabindex="-1"></a><span class="co">#&gt; 59   Area_59 2.30968302 0.02500000       1.9851610     0.015702140</span></span>
-<span id="cb2-80"><a href="#cb2-80" tabindex="-1"></a><span class="co">#&gt; 60   Area_60 4.47627250 0.02173913       4.7240893     0.014292655</span></span>
-<span id="cb2-81"><a href="#cb2-81" tabindex="-1"></a><span class="co">#&gt; 61   Area_61 2.38392852 0.02083333       2.1114553     0.017386113</span></span>
-<span id="cb2-82"><a href="#cb2-82" tabindex="-1"></a><span class="co">#&gt; 62   Area_62 2.53208726 0.04000000       2.4854768     0.015512306</span></span>
-<span id="cb2-83"><a href="#cb2-83" tabindex="-1"></a><span class="co">#&gt; 63   Area_63 5.56855882 0.05555556       6.6214332     0.019895426</span></span>
-<span id="cb2-84"><a href="#cb2-84" tabindex="-1"></a><span class="co">#&gt; 64   Area_64 0.92735353 0.05000000       1.1653985     0.020448694</span></span>
-<span id="cb2-85"><a href="#cb2-85" tabindex="-1"></a><span class="co">#&gt; 65   Area_65 4.88855184 0.02564103       3.7606831     0.015044426</span></span>
-<span id="cb2-86"><a href="#cb2-86" tabindex="-1"></a><span class="co">#&gt; 66   Area_66 3.31214984 0.05263158       5.3823841     0.010856887</span></span>
-<span id="cb2-87"><a href="#cb2-87" tabindex="-1"></a><span class="co">#&gt; 67   Area_67 1.52726950 0.02325581       2.3133485     0.016795905</span></span>
-<span id="cb2-88"><a href="#cb2-88" tabindex="-1"></a><span class="co">#&gt; 68   Area_68 4.40878855 0.02127660       4.4734425     0.016129507</span></span>
-<span id="cb2-89"><a href="#cb2-89" tabindex="-1"></a><span class="co">#&gt; 69   Area_69 2.22273147 0.03448276       0.6820827     0.014236756</span></span>
-<span id="cb2-90"><a href="#cb2-90" tabindex="-1"></a><span class="co">#&gt; 70   Area_70 6.42408535 0.04347826       6.0177516     0.012162971</span></span>
-<span id="cb2-91"><a href="#cb2-91" tabindex="-1"></a><span class="co">#&gt; 71   Area_71 3.35656716 0.06666667       3.5862996     0.024148744</span></span>
-<span id="cb2-92"><a href="#cb2-92" tabindex="-1"></a><span class="co">#&gt; 72   Area_72 5.46313040 0.03703704       5.1316058     0.023269390</span></span>
-<span id="cb2-93"><a href="#cb2-93" tabindex="-1"></a><span class="co">#&gt; 73   Area_73 4.72021401 0.09090909       5.2895530     0.030655253</span></span>
-<span id="cb2-94"><a href="#cb2-94" tabindex="-1"></a><span class="co">#&gt; 74   Area_74 6.53798206 0.05882353       4.7040736     0.026067722</span></span>
-<span id="cb2-95"><a href="#cb2-95" tabindex="-1"></a><span class="co">#&gt; 75   Area_75 6.27414527 0.05000000       4.6479569     0.029302346</span></span>
-<span id="cb2-96"><a href="#cb2-96" tabindex="-1"></a><span class="co">#&gt; 76   Area_76 6.20887050 0.03333333       6.0260522     0.029446345</span></span>
-<span id="cb2-97"><a href="#cb2-97" tabindex="-1"></a><span class="co">#&gt; 77   Area_77 5.71789021 0.06250000       4.9534653     0.018619757</span></span>
-<span id="cb2-98"><a href="#cb2-98" tabindex="-1"></a><span class="co">#&gt; 78   Area_78 3.05226922 0.03125000       2.3827959     0.014070677</span></span>
-<span id="cb2-99"><a href="#cb2-99" tabindex="-1"></a><span class="co">#&gt; 79   Area_79 2.02207807 0.05882353       2.7679932     0.027160222</span></span>
-<span id="cb2-100"><a href="#cb2-100" tabindex="-1"></a><span class="co">#&gt; 80   Area_80 8.60147781 0.05263158       8.0247737     0.019701001</span></span>
-<span id="cb2-101"><a href="#cb2-101" tabindex="-1"></a><span class="co">#&gt; 81   Area_81 3.09721018 0.02173913       3.4336344     0.023372044</span></span>
-<span id="cb2-102"><a href="#cb2-102" tabindex="-1"></a><span class="co">#&gt; 82   Area_82 7.41660997 0.03846154       6.6645883     0.013760574</span></span>
-<span id="cb2-103"><a href="#cb2-103" tabindex="-1"></a><span class="co">#&gt; 83   Area_83 2.28788908 0.06666667       3.2020414     0.023625796</span></span>
-<span id="cb2-104"><a href="#cb2-104" tabindex="-1"></a><span class="co">#&gt; 84   Area_84 7.22179102 0.02040816       7.8235886     0.012488577</span></span>
-<span id="cb2-105"><a href="#cb2-105" tabindex="-1"></a><span class="co">#&gt; 85   Area_85 5.76386565 0.06666667       6.1391598     0.032806274</span></span>
-<span id="cb2-106"><a href="#cb2-106" tabindex="-1"></a><span class="co">#&gt; 86   Area_86 4.67584433 0.02702703       5.5000523     0.020980709</span></span>
-<span id="cb2-107"><a href="#cb2-107" tabindex="-1"></a><span class="co">#&gt; 87   Area_87 1.65961121 0.02439024       1.5172285     0.014866415</span></span>
-<span id="cb2-108"><a href="#cb2-108" tabindex="-1"></a><span class="co">#&gt; 88   Area_88 5.01709843 0.02272727       5.1823634     0.025795404</span></span>
-<span id="cb2-109"><a href="#cb2-109" tabindex="-1"></a><span class="co">#&gt; 89   Area_89 1.75334208 0.02702703       2.6106353     0.020045075</span></span>
-<span id="cb2-110"><a href="#cb2-110" tabindex="-1"></a><span class="co">#&gt; 90   Area_90 5.33088028 0.03448276       2.7160922     0.011662084</span></span>
-<span id="cb2-111"><a href="#cb2-111" tabindex="-1"></a><span class="co">#&gt; 91   Area_91 7.01441155 0.10000000       8.4245453     0.020021971</span></span>
-<span id="cb2-112"><a href="#cb2-112" tabindex="-1"></a><span class="co">#&gt; 92   Area_92 2.78415535 0.07142857       3.9432778     0.019951082</span></span>
-<span id="cb2-113"><a href="#cb2-113" tabindex="-1"></a><span class="co">#&gt; 93   Area_93 4.74526632 0.05000000       4.0209464     0.026326195</span></span>
-<span id="cb2-114"><a href="#cb2-114" tabindex="-1"></a><span class="co">#&gt; 94   Area_94 7.77533877 0.03448276       7.1847548     0.021310251</span></span>
-<span id="cb2-115"><a href="#cb2-115" tabindex="-1"></a><span class="co">#&gt; 95   Area_95 1.47097284 0.09090909       3.4589957     0.013389205</span></span>
-<span id="cb2-116"><a href="#cb2-116" tabindex="-1"></a><span class="co">#&gt; 96   Area_96 3.61976837 0.05263158       2.9538557     0.030311746</span></span>
-<span id="cb2-117"><a href="#cb2-117" tabindex="-1"></a><span class="co">#&gt; 97   Area_97 0.40577186 0.06250000       2.2767197     0.025488004</span></span>
-<span id="cb2-118"><a href="#cb2-118" tabindex="-1"></a><span class="co">#&gt; 98   Area_98 2.25785409 0.02127660       3.0580487     0.016067858</span></span>
-<span id="cb2-119"><a href="#cb2-119" tabindex="-1"></a><span class="co">#&gt; 99   Area_99 4.84838972 0.02222222       3.6453263     0.011528485</span></span>
-<span id="cb2-120"><a href="#cb2-120" tabindex="-1"></a><span class="co">#&gt; 100 Area_100 8.27389818 0.03125000       7.8241605     0.016480845</span></span>
-<span id="cb2-121"><a href="#cb2-121" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb2-122"><a href="#cb2-122" tabindex="-1"></a><span class="co">#&gt; * Note: Use summary() for model diagnostics or extract $estimation for full results.</span></span></code></pre></div>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="at">B         =</span> <span class="dv">50</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>  <span class="at">seed      =</span> <span class="dv">1</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>fit</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt; === Geoadditive Small Area Estimation Model ===</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt; Formula (linear) : y ~ x1 </span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; Nonlinear terms  : x2 </span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt; Spatial terms    : lat, lon </span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; Number of Areas  : 100 </span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt;         area direct_est direct_mse geoadditive_est geoadditive_mse</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt; 1    Area_01 5.75116528 0.06666667       6.5584718     0.021507138</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co">#&gt; 2    Area_02 0.04273984 0.04000000      -0.2194713     0.027056796</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co">#&gt; 3    Area_03 6.61571316 0.04166667       4.6159626     0.016272767</span></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co">#&gt; 4    Area_04 6.23637659 0.03571429       5.2761556     0.018154033</span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="co">#&gt; 5    Area_05 3.90330728 0.08333333       5.6670604     0.031721017</span></span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="co">#&gt; 6    Area_06 4.18112746 0.02380952       5.0320352     0.016113246</span></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="co">#&gt; 7    Area_07 5.11069626 0.02380952       4.9811352     0.017078133</span></span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a><span class="co">#&gt; 8    Area_08 1.26974831 0.05000000       1.5226914     0.025793983</span></span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a><span class="co">#&gt; 9    Area_09 2.53503718 0.02222222       3.5927593     0.019069102</span></span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a><span class="co">#&gt; 10   Area_10 6.37934945 0.05263158       5.0739790     0.018862764</span></span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a><span class="co">#&gt; 11   Area_11 1.94237636 0.03030303       3.1567750     0.020523867</span></span>
+<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a><span class="co">#&gt; 12   Area_12 6.16401327 0.02702703       6.0470741     0.013692276</span></span>
+<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a><span class="co">#&gt; 13   Area_13 3.21091033 0.02083333       2.8855341     0.015969708</span></span>
+<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a><span class="co">#&gt; 14   Area_14 2.64910648 0.03703704       2.1242307     0.034773287</span></span>
+<span id="cb2-34"><a href="#cb2-34" tabindex="-1"></a><span class="co">#&gt; 15   Area_15 1.96870917 0.03846154       3.3526977     0.022162359</span></span>
+<span id="cb2-35"><a href="#cb2-35" tabindex="-1"></a><span class="co">#&gt; 16   Area_16 4.02261620 0.03448276       4.2250664     0.028777049</span></span>
+<span id="cb2-36"><a href="#cb2-36" tabindex="-1"></a><span class="co">#&gt; 17   Area_17 6.62251124 0.05555556       5.8135386     0.021529082</span></span>
+<span id="cb2-37"><a href="#cb2-37" tabindex="-1"></a><span class="co">#&gt; 18   Area_18 1.78206408 0.05000000       1.8398888     0.042404317</span></span>
+<span id="cb2-38"><a href="#cb2-38" tabindex="-1"></a><span class="co">#&gt; 19   Area_19 3.67762650 0.05882353       4.5615501     0.023133610</span></span>
+<span id="cb2-39"><a href="#cb2-39" tabindex="-1"></a><span class="co">#&gt; 20   Area_20 4.53683605 0.07142857       3.8141823     0.041533565</span></span>
+<span id="cb2-40"><a href="#cb2-40" tabindex="-1"></a><span class="co">#&gt; 21   Area_21 6.54020334 0.02631579       6.4190328     0.015254173</span></span>
+<span id="cb2-41"><a href="#cb2-41" tabindex="-1"></a><span class="co">#&gt; 22   Area_22 4.17529738 0.06666667       3.3563247     0.022375091</span></span>
+<span id="cb2-42"><a href="#cb2-42" tabindex="-1"></a><span class="co">#&gt; 23   Area_23 3.61164478 0.05263158       5.0499082     0.023353784</span></span>
+<span id="cb2-43"><a href="#cb2-43" tabindex="-1"></a><span class="co">#&gt; 24   Area_24 3.26737137 0.02857143       3.4429183     0.022572405</span></span>
+<span id="cb2-44"><a href="#cb2-44" tabindex="-1"></a><span class="co">#&gt; 25   Area_25 4.31371129 0.05555556       2.8398809     0.012530196</span></span>
+<span id="cb2-45"><a href="#cb2-45" tabindex="-1"></a><span class="co">#&gt; 26   Area_26 4.29320168 0.05000000       4.4880609     0.036623890</span></span>
+<span id="cb2-46"><a href="#cb2-46" tabindex="-1"></a><span class="co">#&gt; 27   Area_27 4.79593009 0.06666667       5.6118172     0.053183809</span></span>
+<span id="cb2-47"><a href="#cb2-47" tabindex="-1"></a><span class="co">#&gt; 28   Area_28 1.39586453 0.02439024       1.3447014     0.020906532</span></span>
+<span id="cb2-48"><a href="#cb2-48" tabindex="-1"></a><span class="co">#&gt; 29   Area_29 1.75747607 0.04761905       2.0704647     0.016888943</span></span>
+<span id="cb2-49"><a href="#cb2-49" tabindex="-1"></a><span class="co">#&gt; 30   Area_30 7.03054359 0.03571429       5.2990814     0.023559425</span></span>
+<span id="cb2-50"><a href="#cb2-50" tabindex="-1"></a><span class="co">#&gt; 31   Area_31 5.71163406 0.02777778       5.5768790     0.013523816</span></span>
+<span id="cb2-51"><a href="#cb2-51" tabindex="-1"></a><span class="co">#&gt; 32   Area_32 4.26725955 0.02439024       2.9293680     0.013310307</span></span>
+<span id="cb2-52"><a href="#cb2-52" tabindex="-1"></a><span class="co">#&gt; 33   Area_33 4.06595513 0.02777778       5.5599192     0.019003137</span></span>
+<span id="cb2-53"><a href="#cb2-53" tabindex="-1"></a><span class="co">#&gt; 34   Area_34 5.35081995 0.02564103       5.4551451     0.015787673</span></span>
+<span id="cb2-54"><a href="#cb2-54" tabindex="-1"></a><span class="co">#&gt; 35   Area_35 1.61017708 0.07692308       2.2189151     0.043365623</span></span>
+<span id="cb2-55"><a href="#cb2-55" tabindex="-1"></a><span class="co">#&gt; 36   Area_36 5.85728459 0.03030303       5.0806900     0.021185932</span></span>
+<span id="cb2-56"><a href="#cb2-56" tabindex="-1"></a><span class="co">#&gt; 37   Area_37 4.01020285 0.02702703       4.3947065     0.026027452</span></span>
+<span id="cb2-57"><a href="#cb2-57" tabindex="-1"></a><span class="co">#&gt; 38   Area_38 4.60056997 0.08333333       4.6976748     0.044418646</span></span>
+<span id="cb2-58"><a href="#cb2-58" tabindex="-1"></a><span class="co">#&gt; 39   Area_39 4.25093185 0.02040816       4.6713304     0.016613418</span></span>
+<span id="cb2-59"><a href="#cb2-59" tabindex="-1"></a><span class="co">#&gt; 40   Area_40 4.61888304 0.06666667       6.4351168     0.020398292</span></span>
+<span id="cb2-60"><a href="#cb2-60" tabindex="-1"></a><span class="co">#&gt; 41   Area_41 2.05759723 0.02222222       2.2493178     0.021959039</span></span>
+<span id="cb2-61"><a href="#cb2-61" tabindex="-1"></a><span class="co">#&gt; 42   Area_42 4.02118521 0.02564103       3.1208296     0.010592489</span></span>
+<span id="cb2-62"><a href="#cb2-62" tabindex="-1"></a><span class="co">#&gt; 43   Area_43 6.88024386 0.05263158       6.1245959     0.056845280</span></span>
+<span id="cb2-63"><a href="#cb2-63" tabindex="-1"></a><span class="co">#&gt; 44   Area_44 1.56221280 0.02941176       2.7819417     0.011989826</span></span>
+<span id="cb2-64"><a href="#cb2-64" tabindex="-1"></a><span class="co">#&gt; 45   Area_45 5.98058025 0.02127660       5.7648721     0.010667476</span></span>
+<span id="cb2-65"><a href="#cb2-65" tabindex="-1"></a><span class="co">#&gt; 46   Area_46 5.96758672 0.02222222       4.6617281     0.008909519</span></span>
+<span id="cb2-66"><a href="#cb2-66" tabindex="-1"></a><span class="co">#&gt; 47   Area_47 8.32962309 0.02000000       7.8744444     0.011747158</span></span>
+<span id="cb2-67"><a href="#cb2-67" tabindex="-1"></a><span class="co">#&gt; 48   Area_48 1.43097959 0.02941176       2.7227587     0.019769323</span></span>
+<span id="cb2-68"><a href="#cb2-68" tabindex="-1"></a><span class="co">#&gt; 49   Area_49 1.01745484 0.07692308       2.8736794     0.026301599</span></span>
+<span id="cb2-69"><a href="#cb2-69" tabindex="-1"></a><span class="co">#&gt; 50   Area_50 6.88856129 0.04166667       4.3946852     0.019989585</span></span>
+<span id="cb2-70"><a href="#cb2-70" tabindex="-1"></a><span class="co">#&gt; 51   Area_51 3.68527035 0.03225806       4.0760400     0.025988901</span></span>
+<span id="cb2-71"><a href="#cb2-71" tabindex="-1"></a><span class="co">#&gt; 52   Area_52 4.67601131 0.03030303       5.0455598     0.019095078</span></span>
+<span id="cb2-72"><a href="#cb2-72" tabindex="-1"></a><span class="co">#&gt; 53   Area_53 2.50373745 0.02083333       3.9137410     0.007286870</span></span>
+<span id="cb2-73"><a href="#cb2-73" tabindex="-1"></a><span class="co">#&gt; 54   Area_54 2.63136965 0.02173913       3.2616952     0.015090068</span></span>
+<span id="cb2-74"><a href="#cb2-74" tabindex="-1"></a><span class="co">#&gt; 55   Area_55 3.18783384 0.04166667       4.0419625     0.022261292</span></span>
+<span id="cb2-75"><a href="#cb2-75" tabindex="-1"></a><span class="co">#&gt; 56   Area_56 7.87355569 0.04000000       7.5428429     0.018283139</span></span>
+<span id="cb2-76"><a href="#cb2-76" tabindex="-1"></a><span class="co">#&gt; 57   Area_57 7.12741366 0.03571429       6.6575681     0.035425589</span></span>
+<span id="cb2-77"><a href="#cb2-77" tabindex="-1"></a><span class="co">#&gt; 58   Area_58 5.65875629 0.05882353       4.6237529     0.020822989</span></span>
+<span id="cb2-78"><a href="#cb2-78" tabindex="-1"></a><span class="co">#&gt; 59   Area_59 2.30968302 0.02500000       1.9851610     0.015979246</span></span>
+<span id="cb2-79"><a href="#cb2-79" tabindex="-1"></a><span class="co">#&gt; 60   Area_60 4.47627250 0.02173913       4.7240893     0.019235812</span></span>
+<span id="cb2-80"><a href="#cb2-80" tabindex="-1"></a><span class="co">#&gt; 61   Area_61 2.38392852 0.02083333       2.1114553     0.018373663</span></span>
+<span id="cb2-81"><a href="#cb2-81" tabindex="-1"></a><span class="co">#&gt; 62   Area_62 2.53208726 0.04000000       2.4854768     0.016750046</span></span>
+<span id="cb2-82"><a href="#cb2-82" tabindex="-1"></a><span class="co">#&gt; 63   Area_63 5.56855882 0.05555556       6.6214332     0.023519343</span></span>
+<span id="cb2-83"><a href="#cb2-83" tabindex="-1"></a><span class="co">#&gt; 64   Area_64 0.92735353 0.05000000       1.1653985     0.016368407</span></span>
+<span id="cb2-84"><a href="#cb2-84" tabindex="-1"></a><span class="co">#&gt; 65   Area_65 4.88855184 0.02564103       3.7606831     0.019966752</span></span>
+<span id="cb2-85"><a href="#cb2-85" tabindex="-1"></a><span class="co">#&gt; 66   Area_66 3.31214984 0.05263158       5.3823841     0.013930276</span></span>
+<span id="cb2-86"><a href="#cb2-86" tabindex="-1"></a><span class="co">#&gt; 67   Area_67 1.52726950 0.02325581       2.3133485     0.016404268</span></span>
+<span id="cb2-87"><a href="#cb2-87" tabindex="-1"></a><span class="co">#&gt; 68   Area_68 4.40878855 0.02127660       4.4734425     0.014926272</span></span>
+<span id="cb2-88"><a href="#cb2-88" tabindex="-1"></a><span class="co">#&gt; 69   Area_69 2.22273147 0.03448276       0.6820827     0.015245959</span></span>
+<span id="cb2-89"><a href="#cb2-89" tabindex="-1"></a><span class="co">#&gt; 70   Area_70 6.42408535 0.04347826       6.0177516     0.016022447</span></span>
+<span id="cb2-90"><a href="#cb2-90" tabindex="-1"></a><span class="co">#&gt; 71   Area_71 3.35656716 0.06666667       3.5862996     0.016581429</span></span>
+<span id="cb2-91"><a href="#cb2-91" tabindex="-1"></a><span class="co">#&gt; 72   Area_72 5.46313040 0.03703704       5.1316058     0.015774639</span></span>
+<span id="cb2-92"><a href="#cb2-92" tabindex="-1"></a><span class="co">#&gt; 73   Area_73 4.72021401 0.09090909       5.2895530     0.048032836</span></span>
+<span id="cb2-93"><a href="#cb2-93" tabindex="-1"></a><span class="co">#&gt; 74   Area_74 6.53798206 0.05882353       4.7040736     0.032786770</span></span>
+<span id="cb2-94"><a href="#cb2-94" tabindex="-1"></a><span class="co">#&gt; 75   Area_75 6.27414527 0.05000000       4.6479569     0.023467529</span></span>
+<span id="cb2-95"><a href="#cb2-95" tabindex="-1"></a><span class="co">#&gt; 76   Area_76 6.20887050 0.03333333       6.0260522     0.018904108</span></span>
+<span id="cb2-96"><a href="#cb2-96" tabindex="-1"></a><span class="co">#&gt; 77   Area_77 5.71789021 0.06250000       4.9534653     0.024554384</span></span>
+<span id="cb2-97"><a href="#cb2-97" tabindex="-1"></a><span class="co">#&gt; 78   Area_78 3.05226922 0.03125000       2.3827959     0.014814459</span></span>
+<span id="cb2-98"><a href="#cb2-98" tabindex="-1"></a><span class="co">#&gt; 79   Area_79 2.02207807 0.05882353       2.7679932     0.023619817</span></span>
+<span id="cb2-99"><a href="#cb2-99" tabindex="-1"></a><span class="co">#&gt; 80   Area_80 8.60147781 0.05263158       8.0247737     0.017236775</span></span>
+<span id="cb2-100"><a href="#cb2-100" tabindex="-1"></a><span class="co">#&gt; 81   Area_81 3.09721018 0.02173913       3.4336344     0.019804194</span></span>
+<span id="cb2-101"><a href="#cb2-101" tabindex="-1"></a><span class="co">#&gt; 82   Area_82 7.41660997 0.03846154       6.6645883     0.017538824</span></span>
+<span id="cb2-102"><a href="#cb2-102" tabindex="-1"></a><span class="co">#&gt; 83   Area_83 2.28788908 0.06666667       3.2020414     0.029333122</span></span>
+<span id="cb2-103"><a href="#cb2-103" tabindex="-1"></a><span class="co">#&gt; 84   Area_84 7.22179102 0.02040816       7.8235886     0.011028152</span></span>
+<span id="cb2-104"><a href="#cb2-104" tabindex="-1"></a><span class="co">#&gt; 85   Area_85 5.76386565 0.06666667       6.1391598     0.032499964</span></span>
+<span id="cb2-105"><a href="#cb2-105" tabindex="-1"></a><span class="co">#&gt; 86   Area_86 4.67584433 0.02702703       5.5000523     0.018748214</span></span>
+<span id="cb2-106"><a href="#cb2-106" tabindex="-1"></a><span class="co">#&gt; 87   Area_87 1.65961121 0.02439024       1.5172285     0.018917163</span></span>
+<span id="cb2-107"><a href="#cb2-107" tabindex="-1"></a><span class="co">#&gt; 88   Area_88 5.01709843 0.02272727       5.1823634     0.018209458</span></span>
+<span id="cb2-108"><a href="#cb2-108" tabindex="-1"></a><span class="co">#&gt; 89   Area_89 1.75334208 0.02702703       2.6106353     0.016110202</span></span>
+<span id="cb2-109"><a href="#cb2-109" tabindex="-1"></a><span class="co">#&gt; 90   Area_90 5.33088028 0.03448276       2.7160922     0.011258881</span></span>
+<span id="cb2-110"><a href="#cb2-110" tabindex="-1"></a><span class="co">#&gt; 91   Area_91 7.01441155 0.10000000       8.4245453     0.016594209</span></span>
+<span id="cb2-111"><a href="#cb2-111" tabindex="-1"></a><span class="co">#&gt; 92   Area_92 2.78415535 0.07142857       3.9432778     0.024295958</span></span>
+<span id="cb2-112"><a href="#cb2-112" tabindex="-1"></a><span class="co">#&gt; 93   Area_93 4.74526632 0.05000000       4.0209464     0.025945634</span></span>
+<span id="cb2-113"><a href="#cb2-113" tabindex="-1"></a><span class="co">#&gt; 94   Area_94 7.77533877 0.03448276       7.1847548     0.014407159</span></span>
+<span id="cb2-114"><a href="#cb2-114" tabindex="-1"></a><span class="co">#&gt; 95   Area_95 1.47097284 0.09090909       3.4589957     0.019977457</span></span>
+<span id="cb2-115"><a href="#cb2-115" tabindex="-1"></a><span class="co">#&gt; 96   Area_96 3.61976837 0.05263158       2.9538557     0.026825693</span></span>
+<span id="cb2-116"><a href="#cb2-116" tabindex="-1"></a><span class="co">#&gt; 97   Area_97 0.40577186 0.06250000       2.2767197     0.030972634</span></span>
+<span id="cb2-117"><a href="#cb2-117" tabindex="-1"></a><span class="co">#&gt; 98   Area_98 2.25785409 0.02127660       3.0580487     0.011413899</span></span>
+<span id="cb2-118"><a href="#cb2-118" tabindex="-1"></a><span class="co">#&gt; 99   Area_99 4.84838972 0.02222222       3.6453263     0.016277527</span></span>
+<span id="cb2-119"><a href="#cb2-119" tabindex="-1"></a><span class="co">#&gt; 100 Area_100 8.27389818 0.03125000       7.8241605     0.014522433</span></span>
+<span id="cb2-120"><a href="#cb2-120" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-121"><a href="#cb2-121" tabindex="-1"></a><span class="co">#&gt; * Note: Use summary() for model diagnostics or extract $estimation for full results.</span></span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">summary</span>(fit)</span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; === Summary: Geoadditive Small Area Estimation Model ===</span></span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
@@ -530,10 +529,10 @@ coordinates <code>lat</code>/<code>lon</code>.</p>
 <span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt;       s(x2) 23.8658 23.99319       0</span></span>
 <span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt;  s(lat,lon) 28.5986 28.98766       0</span></span>
 <span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; MSE Summary across areas (Bootstrap):</span></span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt;              Min       Mean        Max</span></span>
-<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; MSE  0.008091791 0.02096572 0.07291035</span></span>
-<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; RMSE 0.089954384 0.14214669 0.27001917</span></span></code></pre></div>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; MSE Summary across areas (Parametric Bootstrap):</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt;               Value</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; Mean MSE 0.02157212</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; RMSE     0.14687450</span></span></code></pre></div>
 </div>
 <div id="comparing-geoadditive-sae-fay-herriot-and-spatial-fay-herriot" class="section level3">
 <h3>Comparing Geoadditive SAE, Fay-Herriot, and Spatial Fay-Herriot</h3>
@@ -552,9 +551,10 @@ comparison table.</p>
 <span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>)</span>
 <span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>fit_cmp<span class="sc">$</span>comparison</span>
 <span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt;                 model        mse      rmse</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; 1         Fay-Herriot 0.04142231 0.1986204</span></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; 2 Spatial Fay-Herriot 0.04143614 0.1986506</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; 3     Geoadditive SAE 0.02096572 0.1421467</span></span></code></pre></div>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; 1     Direct Estimate 0.04193097 0.2047705</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; 2         Fay-Herriot 0.04108135 0.2026853</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; 3 Spatial Fay-Herriot 0.04110830 0.2027518</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; 4     Geoadditive SAE 0.02157212 0.1468745</span></span></code></pre></div>
 </div>
 </div>
 <div id="inspecting-results" class="section level2">

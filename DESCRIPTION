@@ -1,7 +1,7 @@
 Package: geoaddSAE2
 Type: Package
 Title: Geoadditive Small Area Estimation for Area-Level Model
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person(
       given = "Amalyah Rizky Khairunnisa", 
@@ -39,9 +39,9 @@ Depends: R (>= 3.5.0)
 Imports: mgcv, sae, stats
 Config/roxygen2/version: 8.1.0
 NeedsCompilation: no
-Packaged: 2026-09-22 08:16:08 UTC; alya
+Packaged: 2026-10-04 14:51:46 UTC; alya
 Author: Amalyah Rizky Khairunnisa Sutarto [aut, cre],
   Novi Hidayat Pusponegoro [aut, ths]
 Maintainer: Amalyah Rizky Khairunnisa Sutarto <222212489@stis.ac.id>
 Repository: CRAN
-Date/Publication: 2026-09-30 11:40:09 UTC
+Date/Publication: 2026-10-05 07:30:02 UTC

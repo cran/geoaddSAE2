@@ -14,7 +14,6 @@ fit <- geosae(
   vardir    = vardir,
   nonlinear = "x2",
   spatial   = c("lat", "lon"),
-  bootstrap = TRUE,
   B         = 50,
   seed      = 1
 )
