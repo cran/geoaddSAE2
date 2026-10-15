@@ -12,7 +12,7 @@
 
 
 
-<title>geoaddSAE2-intro</title>
+<title>Introduction to geoaddSAE2</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -337,241 +337,575 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">geoaddSAE2-intro</h1>
+<h1 class="title toc-ignore">Introduction to geoaddSAE2</h1>
 
 
 
 <div id="background" class="section level2">
 <h2>Background</h2>
-<p><code>geosae</code> fits the <strong>area-level Geoadditive Small
-Area Estimation (Geoadditive SAE)</strong> model: a semiparametric
-extension of the Fay-Herriot model in which</p>
+<p>The <code>geoaddSAE2</code> package provides the
+<code>geosae()</code> function for fitting an area-level
+<strong>Geoadditive Small Area Estimation (Geoadditive SAE)</strong>
+model.</p>
+<p>The Geoadditive SAE model extends the Fay-Herriot model by allowing
+the relationship between the direct estimator and auxiliary variables to
+contain linear, nonlinear, and spatial components. Specifically:</p>
 <ul>
-<li>linear covariate effects are modelled as usual,</li>
-<li>nonlinear covariate effects are modelled with penalized splines
-(P-splines), and</li>
-<li>spatial variation is modelled with a bivariate thin plate regression
-spline,</li>
+<li>linear covariate effects are represented parametrically;</li>
+<li>nonlinear covariate effects are represented using penalized splines
+(P-splines); and</li>
+<li>spatial variation is represented using a bivariate thin plate
+regression spline.</li>
 </ul>
-<p>all represented jointly as a linear mixed model and fitted by
-Restricted Maximum Likelihood (REML). The Mean Squared Error (MSE) of
-the resulting small area predictor is obtained by parametric
-bootstrap.</p>
+<p>These components are jointly represented within a linear mixed model
+framework. Model parameters and smoothing parameters are estimated using
+<strong>Restricted Maximum Likelihood (REML)</strong>.</p>
+<p>The uncertainty of the resulting small area estimates is quantified
+using the <strong>Mean Squared Error (MSE)</strong> estimated by
+parametric bootstrap.</p>
 <p>The classical Fay-Herriot (FH) and Spatial Fay-Herriot (SFH) models
-are <strong>not</strong> re-implemented: <code>geosae</code> calls the
-existing implementations by the <code>sae</code> package so that the
-three approaches can be fitted and compared consistently.</p>
+are not reimplemented in <code>geoaddSAE2</code>. When model comparison
+is requested, <code>geosae()</code> uses the existing implementations
+provided by the <code>sae</code> package. This allows Geoadditive SAE,
+FH, and SFH estimates to be compared within a consistent workflow.</p>
 </div>
-<div id="a-minimal-example" class="section level2">
-<h2>A minimal example</h2>
+<div id="example-data" class="section level2">
+<h2>Example data</h2>
+<p>The package includes the <code>simulated_sae</code> dataset, which
+can be used to demonstrate the main features of
+<code>geosae()</code>.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(geoaddSAE2)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">data</span>(simulated_sae)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">head</span>(simulated_sae)</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt;      area          y x1       x2         x3        lat      lon     vardir</span></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; 1 Area_01 5.75116528  1 4.138301  3.0539692  -6.111182 122.5995 0.06666667</span></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt; 2 Area_02 0.04273984  0 1.037720 -2.2803723   2.401187 110.3099 0.04000000</span></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; 3 Area_03 6.61571316  1 4.116264  2.5466352  -4.047392 117.4762 0.04166667</span></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; 4 Area_04 6.23637659  1 3.917563  0.4794186   4.011296 138.9058 0.03571429</span></span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; 5 Area_05 3.90330728  1 3.520527 -0.6569142   4.987944 117.2135 0.08333333</span></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; 6 Area_06 4.18112746  1 2.923643 -0.3154003 -10.225540 135.9561 0.02380952</span></span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt;          theta</span></span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; 1  5.899357370</span></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; 2 -0.001369921</span></span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; 3  6.786057967</span></span>
-<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; 4  6.261011210</span></span>
-<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; 5  3.739533377</span></span>
-<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; 6  3.994656977</span></span></code></pre></div>
-<p><code>simulated_sae</code> has a direct estimator <code>y</code>, a
-known sampling variance <code>vardir</code>, a linear covariate
-<code>x1</code>, a nonlinear covariate <code>x2</code>, and spatial
-coordinates <code>lat</code>/<code>lon</code>.</p>
-<div id="geoadditive-sae-only" class="section level3">
-<h3>Geoadditive SAE only</h3>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">geosae</span>(</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="at">data      =</span> simulated_sae,</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="at">formula   =</span> y <span class="sc">~</span> x1,</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="at">vardir    =</span> vardir,</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">nonlinear =</span> <span class="st">&quot;x2&quot;</span>,</span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="at">spatial   =</span> <span class="fu">c</span>(<span class="st">&quot;lat&quot;</span>, <span class="st">&quot;lon&quot;</span>),</span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="at">B         =</span> <span class="dv">50</span>,</span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>  <span class="at">seed      =</span> <span class="dv">1</span></span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>)</span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>fit</span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt; === Geoadditive Small Area Estimation Model ===</span></span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt; Formula (linear) : y ~ x1 </span></span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; Nonlinear terms  : x2 </span></span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt; Spatial terms    : lat, lon </span></span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; Number of Areas  : 100 </span></span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt;         area direct_est direct_mse geoadditive_est geoadditive_mse</span></span>
-<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt; 1    Area_01 5.75116528 0.06666667       6.5584718     0.021507138</span></span>
-<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co">#&gt; 2    Area_02 0.04273984 0.04000000      -0.2194713     0.027056796</span></span>
-<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co">#&gt; 3    Area_03 6.61571316 0.04166667       4.6159626     0.016272767</span></span>
-<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co">#&gt; 4    Area_04 6.23637659 0.03571429       5.2761556     0.018154033</span></span>
-<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="co">#&gt; 5    Area_05 3.90330728 0.08333333       5.6670604     0.031721017</span></span>
-<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="co">#&gt; 6    Area_06 4.18112746 0.02380952       5.0320352     0.016113246</span></span>
-<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="co">#&gt; 7    Area_07 5.11069626 0.02380952       4.9811352     0.017078133</span></span>
-<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a><span class="co">#&gt; 8    Area_08 1.26974831 0.05000000       1.5226914     0.025793983</span></span>
-<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a><span class="co">#&gt; 9    Area_09 2.53503718 0.02222222       3.5927593     0.019069102</span></span>
-<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a><span class="co">#&gt; 10   Area_10 6.37934945 0.05263158       5.0739790     0.018862764</span></span>
-<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a><span class="co">#&gt; 11   Area_11 1.94237636 0.03030303       3.1567750     0.020523867</span></span>
-<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a><span class="co">#&gt; 12   Area_12 6.16401327 0.02702703       6.0470741     0.013692276</span></span>
-<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a><span class="co">#&gt; 13   Area_13 3.21091033 0.02083333       2.8855341     0.015969708</span></span>
-<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a><span class="co">#&gt; 14   Area_14 2.64910648 0.03703704       2.1242307     0.034773287</span></span>
-<span id="cb2-34"><a href="#cb2-34" tabindex="-1"></a><span class="co">#&gt; 15   Area_15 1.96870917 0.03846154       3.3526977     0.022162359</span></span>
-<span id="cb2-35"><a href="#cb2-35" tabindex="-1"></a><span class="co">#&gt; 16   Area_16 4.02261620 0.03448276       4.2250664     0.028777049</span></span>
-<span id="cb2-36"><a href="#cb2-36" tabindex="-1"></a><span class="co">#&gt; 17   Area_17 6.62251124 0.05555556       5.8135386     0.021529082</span></span>
-<span id="cb2-37"><a href="#cb2-37" tabindex="-1"></a><span class="co">#&gt; 18   Area_18 1.78206408 0.05000000       1.8398888     0.042404317</span></span>
-<span id="cb2-38"><a href="#cb2-38" tabindex="-1"></a><span class="co">#&gt; 19   Area_19 3.67762650 0.05882353       4.5615501     0.023133610</span></span>
-<span id="cb2-39"><a href="#cb2-39" tabindex="-1"></a><span class="co">#&gt; 20   Area_20 4.53683605 0.07142857       3.8141823     0.041533565</span></span>
-<span id="cb2-40"><a href="#cb2-40" tabindex="-1"></a><span class="co">#&gt; 21   Area_21 6.54020334 0.02631579       6.4190328     0.015254173</span></span>
-<span id="cb2-41"><a href="#cb2-41" tabindex="-1"></a><span class="co">#&gt; 22   Area_22 4.17529738 0.06666667       3.3563247     0.022375091</span></span>
-<span id="cb2-42"><a href="#cb2-42" tabindex="-1"></a><span class="co">#&gt; 23   Area_23 3.61164478 0.05263158       5.0499082     0.023353784</span></span>
-<span id="cb2-43"><a href="#cb2-43" tabindex="-1"></a><span class="co">#&gt; 24   Area_24 3.26737137 0.02857143       3.4429183     0.022572405</span></span>
-<span id="cb2-44"><a href="#cb2-44" tabindex="-1"></a><span class="co">#&gt; 25   Area_25 4.31371129 0.05555556       2.8398809     0.012530196</span></span>
-<span id="cb2-45"><a href="#cb2-45" tabindex="-1"></a><span class="co">#&gt; 26   Area_26 4.29320168 0.05000000       4.4880609     0.036623890</span></span>
-<span id="cb2-46"><a href="#cb2-46" tabindex="-1"></a><span class="co">#&gt; 27   Area_27 4.79593009 0.06666667       5.6118172     0.053183809</span></span>
-<span id="cb2-47"><a href="#cb2-47" tabindex="-1"></a><span class="co">#&gt; 28   Area_28 1.39586453 0.02439024       1.3447014     0.020906532</span></span>
-<span id="cb2-48"><a href="#cb2-48" tabindex="-1"></a><span class="co">#&gt; 29   Area_29 1.75747607 0.04761905       2.0704647     0.016888943</span></span>
-<span id="cb2-49"><a href="#cb2-49" tabindex="-1"></a><span class="co">#&gt; 30   Area_30 7.03054359 0.03571429       5.2990814     0.023559425</span></span>
-<span id="cb2-50"><a href="#cb2-50" tabindex="-1"></a><span class="co">#&gt; 31   Area_31 5.71163406 0.02777778       5.5768790     0.013523816</span></span>
-<span id="cb2-51"><a href="#cb2-51" tabindex="-1"></a><span class="co">#&gt; 32   Area_32 4.26725955 0.02439024       2.9293680     0.013310307</span></span>
-<span id="cb2-52"><a href="#cb2-52" tabindex="-1"></a><span class="co">#&gt; 33   Area_33 4.06595513 0.02777778       5.5599192     0.019003137</span></span>
-<span id="cb2-53"><a href="#cb2-53" tabindex="-1"></a><span class="co">#&gt; 34   Area_34 5.35081995 0.02564103       5.4551451     0.015787673</span></span>
-<span id="cb2-54"><a href="#cb2-54" tabindex="-1"></a><span class="co">#&gt; 35   Area_35 1.61017708 0.07692308       2.2189151     0.043365623</span></span>
-<span id="cb2-55"><a href="#cb2-55" tabindex="-1"></a><span class="co">#&gt; 36   Area_36 5.85728459 0.03030303       5.0806900     0.021185932</span></span>
-<span id="cb2-56"><a href="#cb2-56" tabindex="-1"></a><span class="co">#&gt; 37   Area_37 4.01020285 0.02702703       4.3947065     0.026027452</span></span>
-<span id="cb2-57"><a href="#cb2-57" tabindex="-1"></a><span class="co">#&gt; 38   Area_38 4.60056997 0.08333333       4.6976748     0.044418646</span></span>
-<span id="cb2-58"><a href="#cb2-58" tabindex="-1"></a><span class="co">#&gt; 39   Area_39 4.25093185 0.02040816       4.6713304     0.016613418</span></span>
-<span id="cb2-59"><a href="#cb2-59" tabindex="-1"></a><span class="co">#&gt; 40   Area_40 4.61888304 0.06666667       6.4351168     0.020398292</span></span>
-<span id="cb2-60"><a href="#cb2-60" tabindex="-1"></a><span class="co">#&gt; 41   Area_41 2.05759723 0.02222222       2.2493178     0.021959039</span></span>
-<span id="cb2-61"><a href="#cb2-61" tabindex="-1"></a><span class="co">#&gt; 42   Area_42 4.02118521 0.02564103       3.1208296     0.010592489</span></span>
-<span id="cb2-62"><a href="#cb2-62" tabindex="-1"></a><span class="co">#&gt; 43   Area_43 6.88024386 0.05263158       6.1245959     0.056845280</span></span>
-<span id="cb2-63"><a href="#cb2-63" tabindex="-1"></a><span class="co">#&gt; 44   Area_44 1.56221280 0.02941176       2.7819417     0.011989826</span></span>
-<span id="cb2-64"><a href="#cb2-64" tabindex="-1"></a><span class="co">#&gt; 45   Area_45 5.98058025 0.02127660       5.7648721     0.010667476</span></span>
-<span id="cb2-65"><a href="#cb2-65" tabindex="-1"></a><span class="co">#&gt; 46   Area_46 5.96758672 0.02222222       4.6617281     0.008909519</span></span>
-<span id="cb2-66"><a href="#cb2-66" tabindex="-1"></a><span class="co">#&gt; 47   Area_47 8.32962309 0.02000000       7.8744444     0.011747158</span></span>
-<span id="cb2-67"><a href="#cb2-67" tabindex="-1"></a><span class="co">#&gt; 48   Area_48 1.43097959 0.02941176       2.7227587     0.019769323</span></span>
-<span id="cb2-68"><a href="#cb2-68" tabindex="-1"></a><span class="co">#&gt; 49   Area_49 1.01745484 0.07692308       2.8736794     0.026301599</span></span>
-<span id="cb2-69"><a href="#cb2-69" tabindex="-1"></a><span class="co">#&gt; 50   Area_50 6.88856129 0.04166667       4.3946852     0.019989585</span></span>
-<span id="cb2-70"><a href="#cb2-70" tabindex="-1"></a><span class="co">#&gt; 51   Area_51 3.68527035 0.03225806       4.0760400     0.025988901</span></span>
-<span id="cb2-71"><a href="#cb2-71" tabindex="-1"></a><span class="co">#&gt; 52   Area_52 4.67601131 0.03030303       5.0455598     0.019095078</span></span>
-<span id="cb2-72"><a href="#cb2-72" tabindex="-1"></a><span class="co">#&gt; 53   Area_53 2.50373745 0.02083333       3.9137410     0.007286870</span></span>
-<span id="cb2-73"><a href="#cb2-73" tabindex="-1"></a><span class="co">#&gt; 54   Area_54 2.63136965 0.02173913       3.2616952     0.015090068</span></span>
-<span id="cb2-74"><a href="#cb2-74" tabindex="-1"></a><span class="co">#&gt; 55   Area_55 3.18783384 0.04166667       4.0419625     0.022261292</span></span>
-<span id="cb2-75"><a href="#cb2-75" tabindex="-1"></a><span class="co">#&gt; 56   Area_56 7.87355569 0.04000000       7.5428429     0.018283139</span></span>
-<span id="cb2-76"><a href="#cb2-76" tabindex="-1"></a><span class="co">#&gt; 57   Area_57 7.12741366 0.03571429       6.6575681     0.035425589</span></span>
-<span id="cb2-77"><a href="#cb2-77" tabindex="-1"></a><span class="co">#&gt; 58   Area_58 5.65875629 0.05882353       4.6237529     0.020822989</span></span>
-<span id="cb2-78"><a href="#cb2-78" tabindex="-1"></a><span class="co">#&gt; 59   Area_59 2.30968302 0.02500000       1.9851610     0.015979246</span></span>
-<span id="cb2-79"><a href="#cb2-79" tabindex="-1"></a><span class="co">#&gt; 60   Area_60 4.47627250 0.02173913       4.7240893     0.019235812</span></span>
-<span id="cb2-80"><a href="#cb2-80" tabindex="-1"></a><span class="co">#&gt; 61   Area_61 2.38392852 0.02083333       2.1114553     0.018373663</span></span>
-<span id="cb2-81"><a href="#cb2-81" tabindex="-1"></a><span class="co">#&gt; 62   Area_62 2.53208726 0.04000000       2.4854768     0.016750046</span></span>
-<span id="cb2-82"><a href="#cb2-82" tabindex="-1"></a><span class="co">#&gt; 63   Area_63 5.56855882 0.05555556       6.6214332     0.023519343</span></span>
-<span id="cb2-83"><a href="#cb2-83" tabindex="-1"></a><span class="co">#&gt; 64   Area_64 0.92735353 0.05000000       1.1653985     0.016368407</span></span>
-<span id="cb2-84"><a href="#cb2-84" tabindex="-1"></a><span class="co">#&gt; 65   Area_65 4.88855184 0.02564103       3.7606831     0.019966752</span></span>
-<span id="cb2-85"><a href="#cb2-85" tabindex="-1"></a><span class="co">#&gt; 66   Area_66 3.31214984 0.05263158       5.3823841     0.013930276</span></span>
-<span id="cb2-86"><a href="#cb2-86" tabindex="-1"></a><span class="co">#&gt; 67   Area_67 1.52726950 0.02325581       2.3133485     0.016404268</span></span>
-<span id="cb2-87"><a href="#cb2-87" tabindex="-1"></a><span class="co">#&gt; 68   Area_68 4.40878855 0.02127660       4.4734425     0.014926272</span></span>
-<span id="cb2-88"><a href="#cb2-88" tabindex="-1"></a><span class="co">#&gt; 69   Area_69 2.22273147 0.03448276       0.6820827     0.015245959</span></span>
-<span id="cb2-89"><a href="#cb2-89" tabindex="-1"></a><span class="co">#&gt; 70   Area_70 6.42408535 0.04347826       6.0177516     0.016022447</span></span>
-<span id="cb2-90"><a href="#cb2-90" tabindex="-1"></a><span class="co">#&gt; 71   Area_71 3.35656716 0.06666667       3.5862996     0.016581429</span></span>
-<span id="cb2-91"><a href="#cb2-91" tabindex="-1"></a><span class="co">#&gt; 72   Area_72 5.46313040 0.03703704       5.1316058     0.015774639</span></span>
-<span id="cb2-92"><a href="#cb2-92" tabindex="-1"></a><span class="co">#&gt; 73   Area_73 4.72021401 0.09090909       5.2895530     0.048032836</span></span>
-<span id="cb2-93"><a href="#cb2-93" tabindex="-1"></a><span class="co">#&gt; 74   Area_74 6.53798206 0.05882353       4.7040736     0.032786770</span></span>
-<span id="cb2-94"><a href="#cb2-94" tabindex="-1"></a><span class="co">#&gt; 75   Area_75 6.27414527 0.05000000       4.6479569     0.023467529</span></span>
-<span id="cb2-95"><a href="#cb2-95" tabindex="-1"></a><span class="co">#&gt; 76   Area_76 6.20887050 0.03333333       6.0260522     0.018904108</span></span>
-<span id="cb2-96"><a href="#cb2-96" tabindex="-1"></a><span class="co">#&gt; 77   Area_77 5.71789021 0.06250000       4.9534653     0.024554384</span></span>
-<span id="cb2-97"><a href="#cb2-97" tabindex="-1"></a><span class="co">#&gt; 78   Area_78 3.05226922 0.03125000       2.3827959     0.014814459</span></span>
-<span id="cb2-98"><a href="#cb2-98" tabindex="-1"></a><span class="co">#&gt; 79   Area_79 2.02207807 0.05882353       2.7679932     0.023619817</span></span>
-<span id="cb2-99"><a href="#cb2-99" tabindex="-1"></a><span class="co">#&gt; 80   Area_80 8.60147781 0.05263158       8.0247737     0.017236775</span></span>
-<span id="cb2-100"><a href="#cb2-100" tabindex="-1"></a><span class="co">#&gt; 81   Area_81 3.09721018 0.02173913       3.4336344     0.019804194</span></span>
-<span id="cb2-101"><a href="#cb2-101" tabindex="-1"></a><span class="co">#&gt; 82   Area_82 7.41660997 0.03846154       6.6645883     0.017538824</span></span>
-<span id="cb2-102"><a href="#cb2-102" tabindex="-1"></a><span class="co">#&gt; 83   Area_83 2.28788908 0.06666667       3.2020414     0.029333122</span></span>
-<span id="cb2-103"><a href="#cb2-103" tabindex="-1"></a><span class="co">#&gt; 84   Area_84 7.22179102 0.02040816       7.8235886     0.011028152</span></span>
-<span id="cb2-104"><a href="#cb2-104" tabindex="-1"></a><span class="co">#&gt; 85   Area_85 5.76386565 0.06666667       6.1391598     0.032499964</span></span>
-<span id="cb2-105"><a href="#cb2-105" tabindex="-1"></a><span class="co">#&gt; 86   Area_86 4.67584433 0.02702703       5.5000523     0.018748214</span></span>
-<span id="cb2-106"><a href="#cb2-106" tabindex="-1"></a><span class="co">#&gt; 87   Area_87 1.65961121 0.02439024       1.5172285     0.018917163</span></span>
-<span id="cb2-107"><a href="#cb2-107" tabindex="-1"></a><span class="co">#&gt; 88   Area_88 5.01709843 0.02272727       5.1823634     0.018209458</span></span>
-<span id="cb2-108"><a href="#cb2-108" tabindex="-1"></a><span class="co">#&gt; 89   Area_89 1.75334208 0.02702703       2.6106353     0.016110202</span></span>
-<span id="cb2-109"><a href="#cb2-109" tabindex="-1"></a><span class="co">#&gt; 90   Area_90 5.33088028 0.03448276       2.7160922     0.011258881</span></span>
-<span id="cb2-110"><a href="#cb2-110" tabindex="-1"></a><span class="co">#&gt; 91   Area_91 7.01441155 0.10000000       8.4245453     0.016594209</span></span>
-<span id="cb2-111"><a href="#cb2-111" tabindex="-1"></a><span class="co">#&gt; 92   Area_92 2.78415535 0.07142857       3.9432778     0.024295958</span></span>
-<span id="cb2-112"><a href="#cb2-112" tabindex="-1"></a><span class="co">#&gt; 93   Area_93 4.74526632 0.05000000       4.0209464     0.025945634</span></span>
-<span id="cb2-113"><a href="#cb2-113" tabindex="-1"></a><span class="co">#&gt; 94   Area_94 7.77533877 0.03448276       7.1847548     0.014407159</span></span>
-<span id="cb2-114"><a href="#cb2-114" tabindex="-1"></a><span class="co">#&gt; 95   Area_95 1.47097284 0.09090909       3.4589957     0.019977457</span></span>
-<span id="cb2-115"><a href="#cb2-115" tabindex="-1"></a><span class="co">#&gt; 96   Area_96 3.61976837 0.05263158       2.9538557     0.026825693</span></span>
-<span id="cb2-116"><a href="#cb2-116" tabindex="-1"></a><span class="co">#&gt; 97   Area_97 0.40577186 0.06250000       2.2767197     0.030972634</span></span>
-<span id="cb2-117"><a href="#cb2-117" tabindex="-1"></a><span class="co">#&gt; 98   Area_98 2.25785409 0.02127660       3.0580487     0.011413899</span></span>
-<span id="cb2-118"><a href="#cb2-118" tabindex="-1"></a><span class="co">#&gt; 99   Area_99 4.84838972 0.02222222       3.6453263     0.016277527</span></span>
-<span id="cb2-119"><a href="#cb2-119" tabindex="-1"></a><span class="co">#&gt; 100 Area_100 8.27389818 0.03125000       7.8241605     0.014522433</span></span>
-<span id="cb2-120"><a href="#cb2-120" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb2-121"><a href="#cb2-121" tabindex="-1"></a><span class="co">#&gt; * Note: Use summary() for model diagnostics or extract $estimation for full results.</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">summary</span>(fit)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; === Summary: Geoadditive Small Area Estimation Model ===</span></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; Nonlinear Terms &amp; Knots:</span></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt;   - x2 : k = 25</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; Model Diagnostics:</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt;   Convergence     : TRUE</span></span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt;   Deviance Expl.  : 78.43%</span></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt;   R-squared (adj) : 0.5310</span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; Fixed-Effect Parameters:</span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt;         term  estimate  std_error      p_value</span></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt;  (Intercept) 3.7845809 0.08884725 0.000000e+00</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt;           x1 0.5661607 0.09451434 2.095703e-09</span></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; Smooth Terms:</span></span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt;        term     edf   ref_df p_value</span></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt;       s(x2) 23.8658 23.99319       0</span></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt;  s(lat,lon) 28.5986 28.98766       0</span></span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; MSE Summary across areas (Parametric Bootstrap):</span></span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt;               Value</span></span>
-<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; Mean MSE 0.02157212</span></span>
-<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; RMSE     0.14687450</span></span></code></pre></div>
-</div>
-<div id="comparing-geoadditive-sae-fay-herriot-and-spatial-fay-herriot" class="section level3">
-<h3>Comparing Geoadditive SAE, Fay-Herriot, and Spatial Fay-Herriot</h3>
-<p>Set <code>compare = TRUE</code> to also fit FH (always) and SFH
-(whenever <code>spatial</code> is supplied), and get a side-by-side
-comparison table.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>fit_cmp <span class="ot">&lt;-</span> <span class="fu">geosae</span>(</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="at">data      =</span> simulated_sae,</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="at">formula   =</span> y <span class="sc">~</span> x1,</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="at">vardir    =</span> vardir,</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="at">nonlinear =</span> <span class="st">&quot;x2&quot;</span>,</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="at">spatial   =</span> <span class="fu">c</span>(<span class="st">&quot;lat&quot;</span>, <span class="st">&quot;lon&quot;</span>),</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="at">compare   =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  <span class="at">B         =</span> <span class="dv">50</span>,</span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  <span class="at">seed      =</span> <span class="dv">1</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>)</span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>fit_cmp<span class="sc">$</span>comparison</span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt;                 model        mse      rmse</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; 1     Direct Estimate 0.04193097 0.2047705</span></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; 2         Fay-Herriot 0.04108135 0.2026853</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; 3 Spatial Fay-Herriot 0.04110830 0.2027518</span></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; 4     Geoadditive SAE 0.02157212 0.1468745</span></span></code></pre></div>
-</div>
-</div>
-<div id="inspecting-results" class="section level2">
-<h2>Inspecting results</h2>
-<p>A fitted <code>geosae</code> object cleanly separates:</p>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">data</span>(simulated_sae)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">head</span>(simulated_sae)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt;       area        y x1       x2         x3        lat      lon     vardir</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; 1 Area_001 4.826302  0 4.138301  3.0539692  -6.111182 122.5995 0.06666667</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; 2 Area_002 1.117877  1 1.037720 -2.2803723   2.401187 110.3099 0.04000000</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; 3 Area_003 6.690850  1 4.116264  2.5466352  -4.047392 117.4762 0.04166667</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; 4 Area_004 6.311514  1 3.917563  0.4794186   4.011296 138.9058 0.03571429</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; 5 Area_005 2.978444  0 3.520527 -0.6569142   4.987944 117.2135 0.08333333</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; 6 Area_006 4.256265  1 2.923643 -0.3154003 -10.225540 135.9561 0.02380952</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt;      theta</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; 1 4.974495</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; 2 1.073767</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; 3 6.861195</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; 4 6.336148</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt; 5 2.814671</span></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="co">#&gt; 6 4.069794</span></span></code></pre></div>
+<p>The dataset contains:</p>
 <ul>
-<li><code>fit$estimation</code> – direct estimate, geoadditive estimate,
-MSE, RMSE per area;</li>
-<li><code>fit$diagnostics</code> – convergence, EDF of smooth terms,
-variance components, R-sq, deviance explained;</li>
-<li><code>fit$parameters</code> – fixed-effect (linear) coefficient
-table;</li>
-<li><code>fit$comparison</code> – model | mse | rmse, when
-<code>compare = TRUE</code>;</li>
-<li><code>fit$models</code> – the underlying fitted model objects, for
-advanced use.</li>
+<li><code>y</code>: direct estimate for each area;</li>
+<li><code>vardir</code>: known sampling variance of the direct
+estimate;</li>
+<li><code>x1</code>: auxiliary variable with a linear effect;</li>
+<li><code>x2</code> and <code>x3</code>: continuous auxiliary variables
+that can be examined for nonlinear relationships; and</li>
+<li><code>lat</code> and <code>lon</code>: spatial coordinates for each
+area.</li>
 </ul>
+</div>
+<div id="exploratory-identification-before-modelling" class="section level2">
+<h2>Exploratory identification before modelling</h2>
+<p>The <code>geosae()</code> function requires the user to explicitly
+specify the variables included in the nonlinear component through the
+<code>nonlinear</code> argument and the coordinates used for the spatial
+component through the <code>spatial</code> argument.</p>
+<p>Before fitting the model, two exploratory checks can be useful:</p>
+<ol style="list-style-type: decimal">
+<li>examining whether continuous auxiliary variables show evidence of
+nonlinear relationships with the direct estimate; and</li>
+<li>examining whether residual spatial autocorrelation remains after
+accounting for auxiliary variables.</li>
+</ol>
+<p>These procedures should be treated as exploratory diagnostics rather
+than strict decision rules. The final model specification should also
+consider the substantive context, theoretical justification, and
+characteristics of the data.</p>
+</div>
+<div id="identifying-nonlinear-relationships" class="section level2">
+<h2>Identifying nonlinear relationships</h2>
+<p>A continuous auxiliary variable can first be examined using a
+weighted generalized additive model.</p>
+<p>Because direct estimates may have different sampling variances, the
+model can be fitted using inverse sampling variance weights:</p>
+<p><span class="math display">\[w_i = \frac{1}{D_i},\]</span></p>
+<p>where <span class="math inline">\(D_i\)</span> denotes the sampling
+variance of the direct estimate for area <span class="math inline">\(i\)</span>.</p>
+<p>The following example compares a linear model with a penalized spline
+model for each candidate continuous covariate.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(mgcv)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>d <span class="ot">&lt;-</span> simulated_sae</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>w <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> d<span class="sc">$</span>vardir</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>nonlinear_candidates <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;x2&quot;</span>, <span class="st">&quot;x3&quot;</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>smooth_models <span class="ot">&lt;-</span> <span class="fu">lapply</span>(</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>  nonlinear_candidates,</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>  <span class="cf">function</span>(v) {</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>    <span class="fu">gam</span>(</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>      <span class="fu">as.formula</span>(<span class="fu">sprintf</span>(<span class="st">&quot;y ~ s(%s, bs = &#39;ps&#39;)&quot;</span>, v)),</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>      <span class="at">data =</span> d,</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>      <span class="at">weights =</span> w,</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>      <span class="at">method =</span> <span class="st">&quot;REML&quot;</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>    )</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>  }</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>)</span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="fu">names</span>(smooth_models) <span class="ot">&lt;-</span> nonlinear_candidates</span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fu">length</span>(smooth_models)))</span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="cf">for</span> (v <span class="cf">in</span> <span class="fu">names</span>(smooth_models)) {</span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>  <span class="fu">plot</span>(</span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>    smooth_models[[v]],</span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>    <span class="at">residuals =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a>    <span class="at">pch =</span> <span class="dv">16</span>,</span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a>    <span class="at">cex =</span> <span class="fl">0.6</span>,</span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a>    <span class="at">shade =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a>    <span class="at">xlab =</span> v,</span>
+<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a>    <span class="at">ylab =</span> <span class="fu">sprintf</span>(<span class="st">&quot;s(%s)&quot;</span>, v)</span>
+<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a>  )</span>
+<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a>}</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div>
+<p>If a variable shows a clear nonlinear pattern, it can be specified in
+<code>geosae()</code> through the <code>nonlinear</code> argument.</p>
+<p>For example:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>nonlinear <span class="ot">=</span> <span class="st">&quot;x3&quot;</span></span></code></pre></div>
+<p>Multiple nonlinear covariates can be supplied as a character vector
+when supported by the model specification.</p>
+</div>
+<div id="identifying-spatial-autocorrelation" class="section level2">
+<h2>Identifying spatial autocorrelation</h2>
+<p>Spatial autocorrelation can be examined before fitting the
+Geoadditive SAE model by testing whether residuals from a nonspatial
+model still exhibit spatial structure.</p>
+<p>One common diagnostic is <strong>Moran’s I</strong>.</p>
+<p>In this example, a spatial neighborhood structure is constructed
+using the four nearest neighbors based on the area coordinates.</p>
+<p>For polygon-based regional data, a contiguity-based neighborhood
+structure, such as queen contiguity, may be more appropriate.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>coords <span class="ot">&lt;-</span> <span class="fu">cbind</span>(d<span class="sc">$</span>lon, d<span class="sc">$</span>lat)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>nb <span class="ot">&lt;-</span> spdep<span class="sc">::</span><span class="fu">knn2nb</span>(spdep<span class="sc">::</span><span class="fu">knearneigh</span>(coords, <span class="at">k =</span> <span class="dv">4</span>))</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>lw <span class="ot">&lt;-</span> spdep<span class="sc">::</span><span class="fu">nb2listw</span>(nb, <span class="at">style =</span> <span class="st">&quot;W&quot;</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>fit_nonspatial <span class="ot">&lt;-</span> mgcv<span class="sc">::</span><span class="fu">gam</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> <span class="fu">s</span>(x3, <span class="at">bs =</span> <span class="st">&quot;ps&quot;</span>),</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>                            <span class="at">data =</span> d,<span class="at">weights =</span> <span class="dv">1</span> <span class="sc">/</span> vardir,<span class="at">method =</span> <span class="st">&quot;REML&quot;</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>res_std <span class="ot">&lt;-</span> <span class="fu">residuals</span>(fit_nonspatial,<span class="at">type =</span> <span class="st">&quot;pearson&quot;</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>spdep<span class="sc">::</span><span class="fu">moran.test</span>(res_std,lw)</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt;  Moran I test under randomisation</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; data:  res_std  </span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; weights: lw    </span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; Moran I statistic standard deviate = 2.1994, p-value = 0.01393</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: greater</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt; Moran I statistic       Expectation          Variance </span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co">#&gt;       0.132778232      -0.010101010       0.004220286</span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>spdep<span class="sc">::</span><span class="fu">moran.mc</span>(res_std,lw,<span class="at">nsim =</span> <span class="dv">999</span>)</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt;  Monte-Carlo simulation of Moran I</span></span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a><span class="co">#&gt; data:  res_std </span></span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="co">#&gt; weights: lw  </span></span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a><span class="co">#&gt; number of simulations + 1: 1000 </span></span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a><span class="co">#&gt; statistic = 0.13278, observed rank = 977, p-value = 0.023</span></span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: greater</span></span></code></pre></div>
+<p>The test is performed on Pearson residuals from the weighted linear
+model. This adjustment is useful because the direct estimates may have
+different sampling variances across areas.</p>
+<p>Evidence of positive and statistically significant residual spatial
+autocorrelation indicates that observations from nearby areas tend to
+retain similar residual values after accounting for the auxiliary
+variables. In this situation, incorporating a spatial component may
+improve the model specification.</p>
+<p>For regional polygon data, spatial neighbors can instead be defined
+using contiguity. For example:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>nb <span class="ot">&lt;-</span> spdep<span class="sc">::</span><span class="fu">poly2nb</span>(regions, <span class="at">queen =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>lw <span class="ot">&lt;-</span> spdep<span class="sc">::</span><span class="fu">nb2listw</span>(</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  nb,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">style =</span> <span class="st">&quot;W&quot;</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="at">zero.policy =</span> <span class="cn">TRUE</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>)</span></code></pre></div>
+<p>Isolated regions with no contiguous neighbors require additional
+consideration. Possible alternatives include nearest-neighbor or
+distance-based neighborhood structures.</p>
+<p>The choice of spatial weights should reflect the geographical
+structure and substantive interpretation of spatial dependence in the
+application.</p>
+</div>
+<div id="fitting-the-geoadditive-sae-model" class="section level2">
+<h2>Fitting the Geoadditive SAE model</h2>
+<p>After identifying the model components, the Geoadditive SAE model can
+be fitted using <code>geosae()</code>.</p>
+<p>The following example specifies:</p>
+<ul>
+<li><code>x1</code> and <code>x2</code> as a linear covariate;</li>
+<li><code>x3</code> as a nonlinear covariate; and</li>
+<li><code>lat</code> and <code>lon</code> as the spatial
+coordinates.</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">geosae</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="at">data      =</span> simulated_sae,</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="at">formula   =</span> y <span class="sc">~</span> x1 <span class="sc">+</span> x2,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">vardir    =</span> vardir,</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="at">nonlinear =</span> <span class="st">&quot;x3&quot;</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="at">spatial   =</span> <span class="fu">c</span>(<span class="st">&quot;lat&quot;</span>, <span class="st">&quot;lon&quot;</span>),</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>  <span class="at">B         =</span> <span class="dv">50</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>  <span class="at">seed      =</span> <span class="dv">1</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>)</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>fit</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; === Geoadditive Small Area Estimation Model ===</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; Formula (linear) : y ~ x1 + x2 </span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; Nonlinear terms  : x3 </span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; Spatial terms    : lat, lon </span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; Number of Areas  : 100 </span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt;         area direct_est direct_mse geoadditive_est geoadditive_mse</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt; 1   Area_001  4.8263024 0.06666667       4.8317411     0.008541429</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co">#&gt; 2   Area_002  1.1178770 0.04000000       1.0512350     0.003407798</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co">#&gt; 3   Area_003  6.6908503 0.04166667       6.9546945     0.004859286</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="co">#&gt; 4   Area_004  6.3115137 0.03571429       6.3762786     0.007922885</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co">#&gt; 5   Area_005  2.9784444 0.08333333       2.7842691     0.009481147</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co">#&gt; 6   Area_006  4.2562646 0.02380952       4.0742504     0.005181869</span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt; 7   Area_007  4.1858334 0.02380952       4.1708974     0.003790017</span></span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="co">#&gt; 8   Area_008  0.3448855 0.05000000       0.5360236     0.004761747</span></span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="co">#&gt; 9   Area_009  1.6101743 0.02222222       1.6590522     0.004976931</span></span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#&gt; 10  Area_010  5.4544866 0.05263158       5.2993304     0.003366953</span></span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="co">#&gt; 11  Area_011  1.0175135 0.03030303       1.2381039     0.005604833</span></span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="co">#&gt; 12  Area_012  5.2391504 0.02702703       5.1716319     0.003351813</span></span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a><span class="co">#&gt; 13  Area_013  2.2860475 0.02083333       2.3958023     0.006397475</span></span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a><span class="co">#&gt; 14  Area_014  2.7242436 0.03703704       2.8272652     0.008640358</span></span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a><span class="co">#&gt; 15  Area_015  1.0438463 0.03846154       1.1126536     0.005062714</span></span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a><span class="co">#&gt; 16  Area_016  4.0977534 0.03448276       3.8400553     0.003930846</span></span>
+<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a><span class="co">#&gt; 17  Area_017  5.6976484 0.05555556       5.6271837     0.006380121</span></span>
+<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a><span class="co">#&gt; 18  Area_018  0.8572012 0.05000000       0.8759385     0.006657705</span></span>
+<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a><span class="co">#&gt; 19  Area_019  3.7527637 0.05882353       3.7908691     0.006921371</span></span>
+<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a><span class="co">#&gt; 20  Area_020  5.6119732 0.07142857       5.4704984     0.013151335</span></span>
+<span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a><span class="co">#&gt; 21  Area_021  5.6153405 0.02631579       5.4709595     0.009325997</span></span>
+<span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a><span class="co">#&gt; 22  Area_022  5.2504345 0.06666667       5.2521847     0.004677019</span></span>
+<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a><span class="co">#&gt; 23  Area_023  3.6867819 0.05263158       4.2091554     0.006457031</span></span>
+<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a><span class="co">#&gt; 24  Area_024  3.3425085 0.02857143       3.4573936     0.005780851</span></span>
+<span id="cb7-44"><a href="#cb7-44" tabindex="-1"></a><span class="co">#&gt; 25  Area_025  3.3888484 0.05555556       3.2671164     0.006901163</span></span>
+<span id="cb7-45"><a href="#cb7-45" tabindex="-1"></a><span class="co">#&gt; 26  Area_026  3.3683388 0.05000000       3.0902378     0.006476772</span></span>
+<span id="cb7-46"><a href="#cb7-46" tabindex="-1"></a><span class="co">#&gt; 27  Area_027  3.8710672 0.06666667       3.5931605     0.007104666</span></span>
+<span id="cb7-47"><a href="#cb7-47" tabindex="-1"></a><span class="co">#&gt; 28  Area_028  1.4710017 0.02439024       1.3932164     0.009367307</span></span>
+<span id="cb7-48"><a href="#cb7-48" tabindex="-1"></a><span class="co">#&gt; 29  Area_029  1.8326132 0.04761905       2.2890876     0.004034720</span></span>
+<span id="cb7-49"><a href="#cb7-49" tabindex="-1"></a><span class="co">#&gt; 30  Area_030  8.1056807 0.03571429       7.9615521     0.005951294</span></span>
+<span id="cb7-50"><a href="#cb7-50" tabindex="-1"></a><span class="co">#&gt; 31  Area_031  5.7867712 0.02777778       5.5979052     0.006271434</span></span>
+<span id="cb7-51"><a href="#cb7-51" tabindex="-1"></a><span class="co">#&gt; 32  Area_032  3.3423967 0.02439024       3.4083279     0.005895901</span></span>
+<span id="cb7-52"><a href="#cb7-52" tabindex="-1"></a><span class="co">#&gt; 33  Area_033  4.1410923 0.02777778       3.7808755     0.004360223</span></span>
+<span id="cb7-53"><a href="#cb7-53" tabindex="-1"></a><span class="co">#&gt; 34  Area_034  4.4259571 0.02564103       4.7379904     0.010765111</span></span>
+<span id="cb7-54"><a href="#cb7-54" tabindex="-1"></a><span class="co">#&gt; 35  Area_035  0.6853142 0.07692308       0.9649417     0.005110834</span></span>
+<span id="cb7-55"><a href="#cb7-55" tabindex="-1"></a><span class="co">#&gt; 36  Area_036  4.9324217 0.03030303       4.8065263     0.005038765</span></span>
+<span id="cb7-56"><a href="#cb7-56" tabindex="-1"></a><span class="co">#&gt; 37  Area_037  3.0853400 0.02702703       3.1073020     0.004387124</span></span>
+<span id="cb7-57"><a href="#cb7-57" tabindex="-1"></a><span class="co">#&gt; 38  Area_038  4.6757071 0.08333333       5.1036175     0.005919271</span></span>
+<span id="cb7-58"><a href="#cb7-58" tabindex="-1"></a><span class="co">#&gt; 39  Area_039  3.3260690 0.02040816       3.1053762     0.006460869</span></span>
+<span id="cb7-59"><a href="#cb7-59" tabindex="-1"></a><span class="co">#&gt; 40  Area_040  4.6940202 0.06666667       4.9062152     0.004284432</span></span>
+<span id="cb7-60"><a href="#cb7-60" tabindex="-1"></a><span class="co">#&gt; 41  Area_041  2.1327344 0.02222222       2.3393480     0.004831009</span></span>
+<span id="cb7-61"><a href="#cb7-61" tabindex="-1"></a><span class="co">#&gt; 42  Area_042  4.0963224 0.02564103       4.0392262     0.007226144</span></span>
+<span id="cb7-62"><a href="#cb7-62" tabindex="-1"></a><span class="co">#&gt; 43  Area_043  5.9553810 0.05263158       5.6005354     0.006298414</span></span>
+<span id="cb7-63"><a href="#cb7-63" tabindex="-1"></a><span class="co">#&gt; 44  Area_044  1.6373499 0.02941176       1.7904855     0.003337508</span></span>
+<span id="cb7-64"><a href="#cb7-64" tabindex="-1"></a><span class="co">#&gt; 45  Area_045  5.0557174 0.02127660       5.1931964     0.005597241</span></span>
+<span id="cb7-65"><a href="#cb7-65" tabindex="-1"></a><span class="co">#&gt; 46  Area_046  6.0427239 0.02222222       6.0677074     0.003346478</span></span>
+<span id="cb7-66"><a href="#cb7-66" tabindex="-1"></a><span class="co">#&gt; 47  Area_047  7.4047602 0.02000000       7.5009800     0.005889805</span></span>
+<span id="cb7-67"><a href="#cb7-67" tabindex="-1"></a><span class="co">#&gt; 48  Area_048  2.5061167 0.02941176       2.5309242     0.004926716</span></span>
+<span id="cb7-68"><a href="#cb7-68" tabindex="-1"></a><span class="co">#&gt; 49  Area_049  2.0925920 0.07692308       1.9999334     0.007052792</span></span>
+<span id="cb7-69"><a href="#cb7-69" tabindex="-1"></a><span class="co">#&gt; 50  Area_050  6.9636984 0.04166667       6.8113523     0.004749930</span></span>
+<span id="cb7-70"><a href="#cb7-70" tabindex="-1"></a><span class="co">#&gt; 51  Area_051  2.7604075 0.03225806       2.5407523     0.011678879</span></span>
+<span id="cb7-71"><a href="#cb7-71" tabindex="-1"></a><span class="co">#&gt; 52  Area_052  3.7511485 0.03030303       3.8450014     0.006818838</span></span>
+<span id="cb7-72"><a href="#cb7-72" tabindex="-1"></a><span class="co">#&gt; 53  Area_053  2.5788746 0.02083333       2.5988258     0.003890244</span></span>
+<span id="cb7-73"><a href="#cb7-73" tabindex="-1"></a><span class="co">#&gt; 54  Area_054  1.7065068 0.02173913       1.5278395     0.005592667</span></span>
+<span id="cb7-74"><a href="#cb7-74" tabindex="-1"></a><span class="co">#&gt; 55  Area_055  3.2629710 0.04166667       3.0504882     0.004045454</span></span>
+<span id="cb7-75"><a href="#cb7-75" tabindex="-1"></a><span class="co">#&gt; 56  Area_056  7.9486928 0.04000000       7.9649409     0.005112815</span></span>
+<span id="cb7-76"><a href="#cb7-76" tabindex="-1"></a><span class="co">#&gt; 57  Area_057  6.2025508 0.03571429       6.1919265     0.004537242</span></span>
+<span id="cb7-77"><a href="#cb7-77" tabindex="-1"></a><span class="co">#&gt; 58  Area_058  4.7338934 0.05882353       5.1235831     0.004999437</span></span>
+<span id="cb7-78"><a href="#cb7-78" tabindex="-1"></a><span class="co">#&gt; 59  Area_059  1.3848202 0.02500000       1.1255494     0.004157284</span></span>
+<span id="cb7-79"><a href="#cb7-79" tabindex="-1"></a><span class="co">#&gt; 60  Area_060  4.5514097 0.02173913       4.5489963     0.004293020</span></span>
+<span id="cb7-80"><a href="#cb7-80" tabindex="-1"></a><span class="co">#&gt; 61  Area_061  3.4590657 0.02083333       3.4011259     0.008894127</span></span>
+<span id="cb7-81"><a href="#cb7-81" tabindex="-1"></a><span class="co">#&gt; 62  Area_062  2.6072244 0.04000000       2.6755887     0.007496457</span></span>
+<span id="cb7-82"><a href="#cb7-82" tabindex="-1"></a><span class="co">#&gt; 63  Area_063  5.6436960 0.05555556       5.7914929     0.006351591</span></span>
+<span id="cb7-83"><a href="#cb7-83" tabindex="-1"></a><span class="co">#&gt; 64  Area_064  2.0024907 0.05000000       2.1751083     0.003031910</span></span>
+<span id="cb7-84"><a href="#cb7-84" tabindex="-1"></a><span class="co">#&gt; 65  Area_065  4.9636890 0.02564103       4.9262858     0.006195432</span></span>
+<span id="cb7-85"><a href="#cb7-85" tabindex="-1"></a><span class="co">#&gt; 66  Area_066  3.3872870 0.05263158       3.7607276     0.003271910</span></span>
+<span id="cb7-86"><a href="#cb7-86" tabindex="-1"></a><span class="co">#&gt; 67  Area_067  0.6024067 0.02325581       0.3387339     0.004146864</span></span>
+<span id="cb7-87"><a href="#cb7-87" tabindex="-1"></a><span class="co">#&gt; 68  Area_068  3.4839257 0.02127660       3.3806968     0.003564383</span></span>
+<span id="cb7-88"><a href="#cb7-88" tabindex="-1"></a><span class="co">#&gt; 69  Area_069  1.2978686 0.03448276       1.1258902     0.004964376</span></span>
+<span id="cb7-89"><a href="#cb7-89" tabindex="-1"></a><span class="co">#&gt; 70  Area_070  6.4992225 0.04347826       6.3765617     0.003958574</span></span>
+<span id="cb7-90"><a href="#cb7-90" tabindex="-1"></a><span class="co">#&gt; 71  Area_071  3.4317043 0.06666667       3.1580549     0.004491638</span></span>
+<span id="cb7-91"><a href="#cb7-91" tabindex="-1"></a><span class="co">#&gt; 72  Area_072  4.5382675 0.03703704       4.6689256     0.004019283</span></span>
+<span id="cb7-92"><a href="#cb7-92" tabindex="-1"></a><span class="co">#&gt; 73  Area_073  3.7953512 0.09090909       4.1705211     0.008331701</span></span>
+<span id="cb7-93"><a href="#cb7-93" tabindex="-1"></a><span class="co">#&gt; 74  Area_074  5.6131192 0.05882353       5.5170237     0.006438238</span></span>
+<span id="cb7-94"><a href="#cb7-94" tabindex="-1"></a><span class="co">#&gt; 75  Area_075  6.3492824 0.05000000       6.4553298     0.004007624</span></span>
+<span id="cb7-95"><a href="#cb7-95" tabindex="-1"></a><span class="co">#&gt; 76  Area_076  6.2840076 0.03333333       5.8701900     0.007462594</span></span>
+<span id="cb7-96"><a href="#cb7-96" tabindex="-1"></a><span class="co">#&gt; 77  Area_077  6.7930274 0.06250000       7.0991415     0.006541877</span></span>
+<span id="cb7-97"><a href="#cb7-97" tabindex="-1"></a><span class="co">#&gt; 78  Area_078  2.1274064 0.03125000       2.1818279     0.028871258</span></span>
+<span id="cb7-98"><a href="#cb7-98" tabindex="-1"></a><span class="co">#&gt; 79  Area_079  1.0972152 0.05882353       0.9636694     0.005657068</span></span>
+<span id="cb7-99"><a href="#cb7-99" tabindex="-1"></a><span class="co">#&gt; 80  Area_080  8.6766150 0.05263158       8.5235853     0.002640405</span></span>
+<span id="cb7-100"><a href="#cb7-100" tabindex="-1"></a><span class="co">#&gt; 81  Area_081  3.1723473 0.02173913       3.1396031     0.005646318</span></span>
+<span id="cb7-101"><a href="#cb7-101" tabindex="-1"></a><span class="co">#&gt; 82  Area_082  6.4917471 0.03846154       6.3879896     0.004866521</span></span>
+<span id="cb7-102"><a href="#cb7-102" tabindex="-1"></a><span class="co">#&gt; 83  Area_083  1.3630262 0.06666667       1.2141609     0.004803740</span></span>
+<span id="cb7-103"><a href="#cb7-103" tabindex="-1"></a><span class="co">#&gt; 84  Area_084  6.2969282 0.02040816       6.3883452     0.003244818</span></span>
+<span id="cb7-104"><a href="#cb7-104" tabindex="-1"></a><span class="co">#&gt; 85  Area_085  4.8390028 0.06666667       4.7187231     0.006756251</span></span>
+<span id="cb7-105"><a href="#cb7-105" tabindex="-1"></a><span class="co">#&gt; 86  Area_086  3.7509815 0.02702703       3.9294310     0.004207409</span></span>
+<span id="cb7-106"><a href="#cb7-106" tabindex="-1"></a><span class="co">#&gt; 87  Area_087  0.7347484 0.02439024       0.7374531     0.003043322</span></span>
+<span id="cb7-107"><a href="#cb7-107" tabindex="-1"></a><span class="co">#&gt; 88  Area_088  4.0922356 0.02272727       4.3999587     0.003449429</span></span>
+<span id="cb7-108"><a href="#cb7-108" tabindex="-1"></a><span class="co">#&gt; 89  Area_089  0.8284792 0.02702703       1.0587830     0.005876176</span></span>
+<span id="cb7-109"><a href="#cb7-109" tabindex="-1"></a><span class="co">#&gt; 90  Area_090  5.4060174 0.03448276       5.3337220     0.006893037</span></span>
+<span id="cb7-110"><a href="#cb7-110" tabindex="-1"></a><span class="co">#&gt; 91  Area_091  6.0895487 0.10000000       5.8489799     0.008924722</span></span>
+<span id="cb7-111"><a href="#cb7-111" tabindex="-1"></a><span class="co">#&gt; 92  Area_092  1.8592925 0.07142857       1.8258583     0.004372337</span></span>
+<span id="cb7-112"><a href="#cb7-112" tabindex="-1"></a><span class="co">#&gt; 93  Area_093  3.8204035 0.05000000       4.0738184     0.006645939</span></span>
+<span id="cb7-113"><a href="#cb7-113" tabindex="-1"></a><span class="co">#&gt; 94  Area_094  7.8504759 0.03448276       7.6439270     0.002529567</span></span>
+<span id="cb7-114"><a href="#cb7-114" tabindex="-1"></a><span class="co">#&gt; 95  Area_095  1.5461100 0.09090909       2.1062171     0.008802101</span></span>
+<span id="cb7-115"><a href="#cb7-115" tabindex="-1"></a><span class="co">#&gt; 96  Area_096  3.6949055 0.05263158       3.5670914     0.015028637</span></span>
+<span id="cb7-116"><a href="#cb7-116" tabindex="-1"></a><span class="co">#&gt; 97  Area_097  1.4809090 0.06250000       1.6064617     0.004123376</span></span>
+<span id="cb7-117"><a href="#cb7-117" tabindex="-1"></a><span class="co">#&gt; 98  Area_098  1.3329912 0.02127660       1.4314250     0.005992331</span></span>
+<span id="cb7-118"><a href="#cb7-118" tabindex="-1"></a><span class="co">#&gt; 99  Area_099  3.9235269 0.02222222       3.8280151     0.003462983</span></span>
+<span id="cb7-119"><a href="#cb7-119" tabindex="-1"></a><span class="co">#&gt; 100 Area_100  8.3490353 0.03125000       8.5106176     0.005628432</span></span>
+<span id="cb7-120"><a href="#cb7-120" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-121"><a href="#cb7-121" tabindex="-1"></a><span class="co">#&gt; * Note: Use summary() for model diagnostics or extract $estimation for full results.</span></span></code></pre></div>
+<p>A more detailed model summary can be obtained using:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">summary</span>(fit)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt; === Summary: Geoadditive Small Area Estimation Model ===</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; Nonlinear Terms &amp; Knots:</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt;   - x3 : k = 25</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; Model Diagnostics:</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt;   Convergence     : TRUE</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt;   Deviance Expl.  : 99.17%</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt;   R-squared (adj) : 0.9903</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt; Fixed-Effect Parameters:</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt;         term estimate  std_error       p_value</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt;  (Intercept) 0.446386 0.05463733  3.084390e-16</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt;           x1 1.042165 0.04079298 5.830432e-144</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt;           x2 1.002540 0.01692491  0.000000e+00</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a><span class="co">#&gt; Smooth Terms:</span></span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a><span class="co">#&gt;        term       edf    ref_df     p_value</span></span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a><span class="co">#&gt;       s(x3) 10.245274 12.285616 0.000000000</span></span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a><span class="co">#&gt;  s(lat,lon)  2.000227  2.000448 0.000457049</span></span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a><span class="co">#&gt; MSE Summary across areas (Parametric Bootstrap):</span></span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a><span class="co">#&gt;                Value</span></span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a><span class="co">#&gt; Mean MSE 0.005999761</span></span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a><span class="co">#&gt; RMSE     0.077458124</span></span></code></pre></div>
+<p>The <code>B</code> argument specifies the number of parametric
+bootstrap replications used to estimate the MSE.</p>
+<p>A small value such as <code>B = 50</code> is useful for demonstration
+because it reduces computation time. A substantially larger value should
+generally be used in empirical applications when stable MSE estimates
+are required.</p>
+</div>
+<div id="comparing-geoadditive-sae-fay-herriot-and-spatial-fay-herriot" class="section level2">
+<h2>Comparing Geoadditive SAE, Fay-Herriot, and Spatial Fay-Herriot</h2>
+<p>The <code>compare</code> argument can be used to fit benchmark
+area-level SAE models together with the Geoadditive SAE model.</p>
+<p>Set:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>compare <span class="ot">=</span> <span class="cn">TRUE</span></span></code></pre></div>
+<p>to fit the Fay-Herriot model and, when spatial information is
+supplied, the Spatial Fay-Herriot model.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>fit_cmp <span class="ot">&lt;-</span> <span class="fu">geosae</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="at">data      =</span> simulated_sae,</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="at">formula   =</span> y <span class="sc">~</span> x1 <span class="sc">+</span> x2,</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="at">vardir    =</span> vardir,</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  <span class="at">nonlinear =</span> <span class="st">&quot;x3&quot;</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="at">spatial   =</span> <span class="fu">c</span>(<span class="st">&quot;lat&quot;</span>, <span class="st">&quot;lon&quot;</span>),</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="at">compare   =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>  <span class="at">B         =</span> <span class="dv">50</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>  <span class="at">seed      =</span> <span class="dv">1</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>)</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>fit_cmp<span class="sc">$</span>comparison</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt;                 model         mse       rmse</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt; 1     Direct Estimate 0.041930967 0.20477052</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; 2         Fay-Herriot 0.039665201 0.19916124</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; 3 Spatial Fay-Herriot 0.039717104 0.19929150</span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt; 4     Geoadditive SAE 0.005999761 0.07745812</span></span></code></pre></div>
+<p>The resulting comparison table provides a concise summary of the
+estimates of model uncertainty across the fitted SAE approaches.</p>
+<p>The purpose of this comparison is not to assume that one model is
+universally preferable. Instead, it allows users to evaluate whether
+incorporating nonlinear and spatial components provides meaningful
+improvements for the data under study.</p>
+</div>
+<div id="inspecting-fitted-results" class="section level2">
+<h2>Inspecting fitted results</h2>
+<p>A fitted <code>geosae</code> object stores the main results in
+separate components.</p>
+<p>The area-level estimates and uncertainty measures are available
+from:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>fit<span class="sc">$</span>estimation</span></code></pre></div>
+<p>This component contains quantities such as:</p>
+<ul>
+<li>direct estimates;</li>
+<li>Geoadditive SAE estimates;</li>
+<li>estimated MSE; and</li>
+<li>estimated RMSE.</li>
+</ul>
+<p>Model diagnostics are available from:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>fit<span class="sc">$</span>diagnostics</span></code></pre></div>
+<p>Depending on the fitted specification, these diagnostics include
+information such as:</p>
+<ul>
+<li>model convergence;</li>
+<li>effective degrees of freedom of smooth components;</li>
+<li>estimated variance components;</li>
+<li>R-squared; and</li>
+<li>deviance explained.</li>
+</ul>
+<p>Estimated coefficients for the linear component are available
+from:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>fit<span class="sc">$</span>parameters</span></code></pre></div>
+<p>When <code>compare = TRUE</code>, model comparison results are
+available from:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>fit<span class="sc">$</span>comparison</span></code></pre></div>
+<p>The underlying fitted model objects are stored in:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>fit<span class="sc">$</span>models</span></code></pre></div>
+<p>These objects can be used for more advanced diagnostics,
+visualization, or further model inspection.</p>
+</div>
+<div id="complete-example" class="section level2">
+<h2>Complete example</h2>
+<p>A complete Geoadditive SAE workflow can therefore be written as:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">library</span>(geoaddSAE2)</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="fu">data</span>(simulated_sae)</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">geosae</span>(</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>  <span class="at">data      =</span> simulated_sae,</span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>  <span class="at">formula   =</span> y <span class="sc">~</span> x1 <span class="sc">+</span> x2,</span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>  <span class="at">vardir    =</span> vardir,</span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>  <span class="at">nonlinear =</span> <span class="st">&quot;x3&quot;</span>,</span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a>  <span class="at">spatial   =</span> <span class="fu">c</span>(<span class="st">&quot;lat&quot;</span>, <span class="st">&quot;lon&quot;</span>),</span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a>  <span class="at">compare   =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a>  <span class="at">B         =</span> <span class="dv">50</span>,</span>
+<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a>  <span class="at">seed      =</span> <span class="dv">1</span></span>
+<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a>)</span>
+<span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a></span>
+<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="fu">summary</span>(fit)</span>
+<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a><span class="co">#&gt; === Summary: Geoadditive Small Area Estimation Model ===</span></span>
+<span id="cb16-18"><a href="#cb16-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a><span class="co">#&gt; Nonlinear Terms &amp; Knots:</span></span>
+<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a><span class="co">#&gt;   - x3 : k = 25</span></span>
+<span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a><span class="co">#&gt; Model Diagnostics:</span></span>
+<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a><span class="co">#&gt;   Convergence     : TRUE</span></span>
+<span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a><span class="co">#&gt;   Deviance Expl.  : 99.17%</span></span>
+<span id="cb16-25"><a href="#cb16-25" tabindex="-1"></a><span class="co">#&gt;   R-squared (adj) : 0.9903</span></span>
+<span id="cb16-26"><a href="#cb16-26" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-27"><a href="#cb16-27" tabindex="-1"></a><span class="co">#&gt; Fixed-Effect Parameters:</span></span>
+<span id="cb16-28"><a href="#cb16-28" tabindex="-1"></a><span class="co">#&gt;         term estimate  std_error       p_value</span></span>
+<span id="cb16-29"><a href="#cb16-29" tabindex="-1"></a><span class="co">#&gt;  (Intercept) 0.446386 0.05463733  3.084390e-16</span></span>
+<span id="cb16-30"><a href="#cb16-30" tabindex="-1"></a><span class="co">#&gt;           x1 1.042165 0.04079298 5.830432e-144</span></span>
+<span id="cb16-31"><a href="#cb16-31" tabindex="-1"></a><span class="co">#&gt;           x2 1.002540 0.01692491  0.000000e+00</span></span>
+<span id="cb16-32"><a href="#cb16-32" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-33"><a href="#cb16-33" tabindex="-1"></a><span class="co">#&gt; Smooth Terms:</span></span>
+<span id="cb16-34"><a href="#cb16-34" tabindex="-1"></a><span class="co">#&gt;        term       edf    ref_df     p_value</span></span>
+<span id="cb16-35"><a href="#cb16-35" tabindex="-1"></a><span class="co">#&gt;       s(x3) 10.245274 12.285616 0.000000000</span></span>
+<span id="cb16-36"><a href="#cb16-36" tabindex="-1"></a><span class="co">#&gt;  s(lat,lon)  2.000227  2.000448 0.000457049</span></span>
+<span id="cb16-37"><a href="#cb16-37" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-38"><a href="#cb16-38" tabindex="-1"></a><span class="co">#&gt; MSE Summary across areas (Parametric Bootstrap):</span></span>
+<span id="cb16-39"><a href="#cb16-39" tabindex="-1"></a><span class="co">#&gt;                Value</span></span>
+<span id="cb16-40"><a href="#cb16-40" tabindex="-1"></a><span class="co">#&gt; Mean MSE 0.005999761</span></span>
+<span id="cb16-41"><a href="#cb16-41" tabindex="-1"></a><span class="co">#&gt; RMSE     0.077458124</span></span>
+<span id="cb16-42"><a href="#cb16-42" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-43"><a href="#cb16-43" tabindex="-1"></a><span class="co">#&gt; Model Comparison:</span></span>
+<span id="cb16-44"><a href="#cb16-44" tabindex="-1"></a><span class="co">#&gt;                model         mse       rmse</span></span>
+<span id="cb16-45"><a href="#cb16-45" tabindex="-1"></a><span class="co">#&gt;      Direct Estimate 0.041930967 0.20477052</span></span>
+<span id="cb16-46"><a href="#cb16-46" tabindex="-1"></a><span class="co">#&gt;          Fay-Herriot 0.039665201 0.19916124</span></span>
+<span id="cb16-47"><a href="#cb16-47" tabindex="-1"></a><span class="co">#&gt;  Spatial Fay-Herriot 0.039717104 0.19929150</span></span>
+<span id="cb16-48"><a href="#cb16-48" tabindex="-1"></a><span class="co">#&gt;      Geoadditive SAE 0.005999761 0.07745812</span></span>
+<span id="cb16-49"><a href="#cb16-49" tabindex="-1"></a></span>
+<span id="cb16-50"><a href="#cb16-50" tabindex="-1"></a><span class="fu">head</span>(fit<span class="sc">$</span>estimation)</span>
+<span id="cb16-51"><a href="#cb16-51" tabindex="-1"></a><span class="co">#&gt;       area direct_est direct_mse geoadditive_est geoadditive_mse   fh_est</span></span>
+<span id="cb16-52"><a href="#cb16-52" tabindex="-1"></a><span class="co">#&gt; 1 Area_001   4.826302 0.06666667        4.831741     0.008541429 4.965387</span></span>
+<span id="cb16-53"><a href="#cb16-53" tabindex="-1"></a><span class="co">#&gt; 2 Area_002   1.117877 0.04000000        1.051235     0.003407798 1.120568</span></span>
+<span id="cb16-54"><a href="#cb16-54" tabindex="-1"></a><span class="co">#&gt; 3 Area_003   6.690850 0.04166667        6.954695     0.004859286 6.716339</span></span>
+<span id="cb16-55"><a href="#cb16-55" tabindex="-1"></a><span class="co">#&gt; 4 Area_004   6.311514 0.03571429        6.376279     0.007922885 6.283086</span></span>
+<span id="cb16-56"><a href="#cb16-56" tabindex="-1"></a><span class="co">#&gt; 5 Area_005   2.978444 0.08333333        2.784269     0.009481147 3.036155</span></span>
+<span id="cb16-57"><a href="#cb16-57" tabindex="-1"></a><span class="co">#&gt; 6 Area_006   4.256265 0.02380952        4.074250     0.005181869 4.254804</span></span>
+<span id="cb16-58"><a href="#cb16-58" tabindex="-1"></a><span class="co">#&gt;       fh_mse  sfh_est    sfh_mse</span></span>
+<span id="cb16-59"><a href="#cb16-59" tabindex="-1"></a><span class="co">#&gt; 1 0.06204274 4.973930 0.06218202</span></span>
+<span id="cb16-60"><a href="#cb16-60" tabindex="-1"></a><span class="co">#&gt; 2 0.03829867 1.113805 0.03835078</span></span>
+<span id="cb16-61"><a href="#cb16-61" tabindex="-1"></a><span class="co">#&gt; 3 0.03980050 6.725553 0.03984349</span></span>
+<span id="cb16-62"><a href="#cb16-62" tabindex="-1"></a><span class="co">#&gt; 4 0.03430318 6.286389 0.03432752</span></span>
+<span id="cb16-63"><a href="#cb16-63" tabindex="-1"></a><span class="co">#&gt; 5 0.07600067 3.032792 0.07604981</span></span>
+<span id="cb16-64"><a href="#cb16-64" tabindex="-1"></a><span class="co">#&gt; 6 0.02317052 4.255011 0.02318165</span></span>
+<span id="cb16-65"><a href="#cb16-65" tabindex="-1"></a></span>
+<span id="cb16-66"><a href="#cb16-66" tabindex="-1"></a>fit<span class="sc">$</span>parameters</span>
+<span id="cb16-67"><a href="#cb16-67" tabindex="-1"></a><span class="co">#&gt;          term estimate  std_error       p_value</span></span>
+<span id="cb16-68"><a href="#cb16-68" tabindex="-1"></a><span class="co">#&gt; 1 (Intercept) 0.446386 0.05463733  3.084390e-16</span></span>
+<span id="cb16-69"><a href="#cb16-69" tabindex="-1"></a><span class="co">#&gt; 2          x1 1.042165 0.04079298 5.830432e-144</span></span>
+<span id="cb16-70"><a href="#cb16-70" tabindex="-1"></a><span class="co">#&gt; 3          x2 1.002540 0.01692491  0.000000e+00</span></span>
+<span id="cb16-71"><a href="#cb16-71" tabindex="-1"></a></span>
+<span id="cb16-72"><a href="#cb16-72" tabindex="-1"></a>fit<span class="sc">$</span>diagnostics</span>
+<span id="cb16-73"><a href="#cb16-73" tabindex="-1"></a><span class="co">#&gt; $method</span></span>
+<span id="cb16-74"><a href="#cb16-74" tabindex="-1"></a><span class="co">#&gt; [1] &quot;REML&quot;</span></span>
+<span id="cb16-75"><a href="#cb16-75" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-76"><a href="#cb16-76" tabindex="-1"></a><span class="co">#&gt; $converged</span></span>
+<span id="cb16-77"><a href="#cb16-77" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb16-78"><a href="#cb16-78" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-79"><a href="#cb16-79" tabindex="-1"></a><span class="co">#&gt; $n_obs</span></span>
+<span id="cb16-80"><a href="#cb16-80" tabindex="-1"></a><span class="co">#&gt; [1] 100</span></span>
+<span id="cb16-81"><a href="#cb16-81" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-82"><a href="#cb16-82" tabindex="-1"></a><span class="co">#&gt; $n_smooth_terms</span></span>
+<span id="cb16-83"><a href="#cb16-83" tabindex="-1"></a><span class="co">#&gt; [1] 2</span></span>
+<span id="cb16-84"><a href="#cb16-84" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-85"><a href="#cb16-85" tabindex="-1"></a><span class="co">#&gt; $edf_table</span></span>
+<span id="cb16-86"><a href="#cb16-86" tabindex="-1"></a><span class="co">#&gt;         term       edf    ref_df     p_value</span></span>
+<span id="cb16-87"><a href="#cb16-87" tabindex="-1"></a><span class="co">#&gt; 1      s(x3) 10.245274 12.285616 0.000000000</span></span>
+<span id="cb16-88"><a href="#cb16-88" tabindex="-1"></a><span class="co">#&gt; 2 s(lat,lon)  2.000227  2.000448 0.000457049</span></span>
+<span id="cb16-89"><a href="#cb16-89" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-90"><a href="#cb16-90" tabindex="-1"></a><span class="co">#&gt; $variance_components</span></span>
+<span id="cb16-91"><a href="#cb16-91" tabindex="-1"></a><span class="co">#&gt;         term      std_dev</span></span>
+<span id="cb16-92"><a href="#cb16-92" tabindex="-1"></a><span class="co">#&gt; 1      s(x3) 0.2092375818</span></span>
+<span id="cb16-93"><a href="#cb16-93" tabindex="-1"></a><span class="co">#&gt; 2 s(lat,lon) 0.0001364843</span></span>
+<span id="cb16-94"><a href="#cb16-94" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-95"><a href="#cb16-95" tabindex="-1"></a><span class="co">#&gt; $r_sq_adj</span></span>
+<span id="cb16-96"><a href="#cb16-96" tabindex="-1"></a><span class="co">#&gt; [1] 0.9903406</span></span>
+<span id="cb16-97"><a href="#cb16-97" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-98"><a href="#cb16-98" tabindex="-1"></a><span class="co">#&gt; $deviance_explained</span></span>
+<span id="cb16-99"><a href="#cb16-99" tabindex="-1"></a><span class="co">#&gt; [1] 0.9917304</span></span>
+<span id="cb16-100"><a href="#cb16-100" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-101"><a href="#cb16-101" tabindex="-1"></a><span class="co">#&gt; $reml_score</span></span>
+<span id="cb16-102"><a href="#cb16-102" tabindex="-1"></a><span class="co">#&gt;    REML </span></span>
+<span id="cb16-103"><a href="#cb16-103" tabindex="-1"></a><span class="co">#&gt; 12.4034 </span></span>
+<span id="cb16-104"><a href="#cb16-104" tabindex="-1"></a><span class="co">#&gt; attr(,&quot;Dp&quot;)</span></span>
+<span id="cb16-105"><a href="#cb16-105" tabindex="-1"></a><span class="co">#&gt; [1] 52.46465</span></span>
+<span id="cb16-106"><a href="#cb16-106" tabindex="-1"></a><span class="co">#&gt; attr(,&quot;ml.pen&quot;)</span></span>
+<span id="cb16-107"><a href="#cb16-107" tabindex="-1"></a><span class="co">#&gt; [1] 36.21415</span></span>
+<span id="cb16-108"><a href="#cb16-108" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-109"><a href="#cb16-109" tabindex="-1"></a><span class="co">#&gt; $bootstrap</span></span>
+<span id="cb16-110"><a href="#cb16-110" tabindex="-1"></a><span class="co">#&gt; $bootstrap$B</span></span>
+<span id="cb16-111"><a href="#cb16-111" tabindex="-1"></a><span class="co">#&gt; [1] 50</span></span>
+<span id="cb16-112"><a href="#cb16-112" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-113"><a href="#cb16-113" tabindex="-1"></a><span class="co">#&gt; $bootstrap$n_failed</span></span>
+<span id="cb16-114"><a href="#cb16-114" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb16-115"><a href="#cb16-115" tabindex="-1"></a></span>
+<span id="cb16-116"><a href="#cb16-116" tabindex="-1"></a>fit<span class="sc">$</span>comparison</span>
+<span id="cb16-117"><a href="#cb16-117" tabindex="-1"></a><span class="co">#&gt;                 model         mse       rmse</span></span>
+<span id="cb16-118"><a href="#cb16-118" tabindex="-1"></a><span class="co">#&gt; 1     Direct Estimate 0.041930967 0.20477052</span></span>
+<span id="cb16-119"><a href="#cb16-119" tabindex="-1"></a><span class="co">#&gt; 2         Fay-Herriot 0.039665201 0.19916124</span></span>
+<span id="cb16-120"><a href="#cb16-120" tabindex="-1"></a><span class="co">#&gt; 3 Spatial Fay-Herriot 0.039717104 0.19929150</span></span>
+<span id="cb16-121"><a href="#cb16-121" tabindex="-1"></a><span class="co">#&gt; 4     Geoadditive SAE 0.005999761 0.07745812</span></span></code></pre></div>
+<p>This workflow combines linear, nonlinear, and spatial modelling
+within an area-level SAE framework while also providing uncertainty
+estimation through parametric bootstrap and optional comparison with
+conventional Fay-Herriot models.</p>
 </div>
 
 

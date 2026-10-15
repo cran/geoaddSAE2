@@ -1,47 +1,192 @@
 ---
-title: "geoaddSAE2-intro"
+title: "Introduction to geoaddSAE2"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{geoaddSAE2-intro}
+  %\VignetteIndexEntry{Introduction to geoaddSAE2}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>", 
-                      warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
+)
+
+has_spdep <- requireNamespace("spdep", quietly = TRUE)
 ```
 
 ## Background
 
-`geosae` fits the **area-level Geoadditive Small Area Estimation (Geoadditive SAE)** model: a semiparametric extension of the Fay-Herriot model in which
+The `geoaddSAE2` package provides the `geosae()` function for fitting an area-level **Geoadditive Small Area Estimation (Geoadditive SAE)** model.
 
-- linear covariate effects are modelled as usual,
-- nonlinear covariate effects are modelled with penalized splines (P-splines), and
-- spatial variation is modelled with a bivariate thin plate regression spline,
+The Geoadditive SAE model extends the Fay-Herriot model by allowing the relationship between the direct estimator and auxiliary variables to contain linear, nonlinear, and spatial components. Specifically:
 
-all represented jointly as a linear mixed model and fitted by Restricted Maximum Likelihood (REML). The Mean Squared Error (MSE) of the resulting small area predictor is obtained by parametric bootstrap.
+- linear covariate effects are represented parametrically;
+- nonlinear covariate effects are represented using penalized splines (P-splines); and
+- spatial variation is represented using a bivariate thin plate regression spline.
 
-The classical Fay-Herriot (FH) and Spatial Fay-Herriot (SFH) models are **not** re-implemented: `geosae` calls the existing implementations by the `sae` package so that the three approaches can be fitted and compared consistently.
+These components are jointly represented within a linear mixed model framework. Model parameters and smoothing parameters are estimated using **Restricted Maximum Likelihood (REML)**.
 
-## A minimal example
+The uncertainty of the resulting small area estimates is quantified using the **Mean Squared Error (MSE)** estimated by parametric bootstrap.
+
+The classical Fay-Herriot (FH) and Spatial Fay-Herriot (SFH) models are not reimplemented in `geoaddSAE2`. When model comparison is requested, `geosae()` uses the existing implementations provided by the `sae` package. This allows Geoadditive SAE, FH, and SFH estimates to be compared within a consistent workflow.
+
+## Example data
+
+The package includes the `simulated_sae` dataset, which can be used to demonstrate the main features of `geosae()`.
 
 ```{r setup}
 library(geoaddSAE2)
+
 data(simulated_sae)
+
 head(simulated_sae)
 ```
 
-`simulated_sae` has a direct estimator `y`, a known sampling variance `vardir`, a linear covariate `x1`, a nonlinear covariate `x2`, and spatial coordinates `lat`/`lon`.
+The dataset contains:
 
-### Geoadditive SAE only
+- `y`: direct estimate for each area;
+- `vardir`: known sampling variance of the direct estimate;
+- `x1`: auxiliary variable with a linear effect;
+- `x2` and `x3`: continuous auxiliary variables that can be examined for nonlinear relationships; and
+- `lat` and `lon`: spatial coordinates for each area.
 
-```{r}
+## Exploratory identification before modelling
+
+The `geosae()` function requires the user to explicitly specify the variables included in the nonlinear component through the `nonlinear` argument and the coordinates used for the spatial component through the `spatial` argument.
+
+Before fitting the model, two exploratory checks can be useful:
+
+1.  examining whether continuous auxiliary variables show evidence of nonlinear relationships with the direct estimate; and
+2.  examining whether residual spatial autocorrelation remains after accounting for auxiliary variables.
+
+These procedures should be treated as exploratory diagnostics rather than strict decision rules. The final model specification should also consider the substantive context, theoretical justification, and characteristics of the data.
+
+## Identifying nonlinear relationships
+
+A continuous auxiliary variable can first be examined using a weighted generalized additive model.
+
+Because direct estimates may have different sampling variances, the model can be fitted using inverse sampling variance weights:
+
+$$w_i = \frac{1}{D_i},$$
+
+where $D_i$ denotes the sampling variance of the direct estimate for area $i$.
+
+The following example compares a linear model with a penalized spline model for each candidate continuous covariate.
+
+```{r plot-nonlinear, fig.width = 7, fig.height = 3.5}
+library(mgcv)
+d <- simulated_sae
+w <- 1 / d$vardir
+
+nonlinear_candidates <- c("x2", "x3")
+
+smooth_models <- lapply(
+  nonlinear_candidates,
+  function(v) {
+    gam(
+      as.formula(sprintf("y ~ s(%s, bs = 'ps')", v)),
+      data = d,
+      weights = w,
+      method = "REML"
+    )
+  }
+)
+
+names(smooth_models) <- nonlinear_candidates
+
+op <- par(mfrow = c(1, length(smooth_models)))
+
+for (v in names(smooth_models)) {
+  plot(
+    smooth_models[[v]],
+    residuals = TRUE,
+    pch = 16,
+    cex = 0.6,
+    shade = TRUE,
+    xlab = v,
+    ylab = sprintf("s(%s)", v)
+  )
+}
+
+par(op)
+```
+
+If a variable shows a clear nonlinear pattern, it can be specified in `geosae()` through the `nonlinear` argument.
+
+For example:
+
+``` r
+nonlinear = "x3"
+```
+
+Multiple nonlinear covariates can be supplied as a character vector when supported by the model specification.
+
+## Identifying spatial autocorrelation
+
+Spatial autocorrelation can be examined before fitting the Geoadditive SAE model by testing whether residuals from a nonspatial model still exhibit spatial structure.
+
+One common diagnostic is **Moran's I**.
+
+In this example, a spatial neighborhood structure is constructed using the four nearest neighbors based on the area coordinates.
+
+For polygon-based regional data, a contiguity-based neighborhood structure, such as queen contiguity, may be more appropriate.
+
+```{r moran, eval = has_spdep}
+coords <- cbind(d$lon, d$lat)
+
+nb <- spdep::knn2nb(spdep::knearneigh(coords, k = 4))
+lw <- spdep::nb2listw(nb, style = "W")
+
+fit_nonspatial <- mgcv::gam(y ~ x1 + x2 + s(x3, bs = "ps"),
+                            data = d,weights = 1 / vardir,method = "REML")
+
+res_std <- residuals(fit_nonspatial,type = "pearson")
+spdep::moran.test(res_std,lw)
+
+set.seed(1)
+spdep::moran.mc(res_std,lw,nsim = 999)
+```
+
+The test is performed on Pearson residuals from the weighted linear model. This adjustment is useful because the direct estimates may have different sampling variances across areas.
+
+Evidence of positive and statistically significant residual spatial autocorrelation indicates that observations from nearby areas tend to retain similar residual values after accounting for the auxiliary variables. In this situation, incorporating a spatial component may improve the model specification.
+
+For regional polygon data, spatial neighbors can instead be defined using contiguity. For example:
+
+``` r
+nb <- spdep::poly2nb(regions, queen = TRUE)
+
+lw <- spdep::nb2listw(
+  nb,
+  style = "W",
+  zero.policy = TRUE
+)
+```
+
+Isolated regions with no contiguous neighbors require additional consideration. Possible alternatives include nearest-neighbor or distance-based neighborhood structures.
+
+The choice of spatial weights should reflect the geographical structure and substantive interpretation of spatial dependence in the application.
+
+## Fitting the Geoadditive SAE model
+
+After identifying the model components, the Geoadditive SAE model can be fitted using `geosae()`.
+
+The following example specifies:
+
+- `x1` and `x2` as a linear covariate;
+- `x3` as a nonlinear covariate; and
+- `lat` and `lon` as the spatial coordinates.
+
+```{r geoadditive-fit}
 fit <- geosae(
   data      = simulated_sae,
-  formula   = y ~ x1,
+  formula   = y ~ x1 + x2,
   vardir    = vardir,
-  nonlinear = "x2",
+  nonlinear = "x3",
   spatial   = c("lat", "lon"),
   B         = 50,
   seed      = 1
@@ -50,34 +195,127 @@ fit <- geosae(
 fit
 ```
 
-```{r}
+A more detailed model summary can be obtained using:
+
+```{r geoadditive-summary}
 summary(fit)
 ```
 
-### Comparing Geoadditive SAE, Fay-Herriot, and Spatial Fay-Herriot
+The `B` argument specifies the number of parametric bootstrap replications used to estimate the MSE.
 
-Set `compare = TRUE` to also fit FH (always) and SFH (whenever `spatial` is supplied), and get a side-by-side comparison table.
+A small value such as `B = 50` is useful for demonstration because it reduces computation time. A substantially larger value should generally be used in empirical applications when stable MSE estimates are required.
 
-```{r}
+## Comparing Geoadditive SAE, Fay-Herriot, and Spatial Fay-Herriot
+
+The `compare` argument can be used to fit benchmark area-level SAE models together with the Geoadditive SAE model.
+
+Set:
+
+``` r
+compare = TRUE
+```
+
+to fit the Fay-Herriot model and, when spatial information is supplied, the Spatial Fay-Herriot model.
+
+```{r model-comparison}
 fit_cmp <- geosae(
   data      = simulated_sae,
-  formula   = y ~ x1,
+  formula   = y ~ x1 + x2,
   vardir    = vardir,
-  nonlinear = "x2",
+  nonlinear = "x3",
   spatial   = c("lat", "lon"),
   compare   = TRUE,
   B         = 50,
   seed      = 1
 )
+
 fit_cmp$comparison
 ```
 
-## Inspecting results
+The resulting comparison table provides a concise summary of the estimates of model uncertainty across the fitted SAE approaches.
 
-A fitted `geosae` object cleanly separates:
+The purpose of this comparison is not to assume that one model is universally preferable. Instead, it allows users to evaluate whether incorporating nonlinear and spatial components provides meaningful improvements for the data under study.
 
-- `fit$estimation` -- direct estimate, geoadditive estimate, MSE, RMSE per area;
-- `fit$diagnostics` -- convergence, EDF of smooth terms, variance components, R-sq, deviance explained;
-- `fit$parameters` -- fixed-effect (linear) coefficient table;
-- `fit$comparison` -- model \| mse \| rmse, when `compare = TRUE`;
-- `fit$models` -- the underlying fitted model objects, for advanced use.
+## Inspecting fitted results
+
+A fitted `geosae` object stores the main results in separate components.
+
+The area-level estimates and uncertainty measures are available from:
+
+``` r
+fit$estimation
+```
+
+This component contains quantities such as:
+
+- direct estimates;
+- Geoadditive SAE estimates;
+- estimated MSE; and
+- estimated RMSE.
+
+Model diagnostics are available from:
+
+``` r
+fit$diagnostics
+```
+
+Depending on the fitted specification, these diagnostics include information such as:
+
+- model convergence;
+- effective degrees of freedom of smooth components;
+- estimated variance components;
+- R-squared; and
+- deviance explained.
+
+Estimated coefficients for the linear component are available from:
+
+``` r
+fit$parameters
+```
+
+When `compare = TRUE`, model comparison results are available from:
+
+``` r
+fit$comparison
+```
+
+The underlying fitted model objects are stored in:
+
+``` r
+fit$models
+```
+
+These objects can be used for more advanced diagnostics, visualization, or further model inspection.
+
+## Complete example
+
+A complete Geoadditive SAE workflow can therefore be written as:
+
+```{r complete-example}
+library(geoaddSAE2)
+
+data(simulated_sae)
+
+fit <- geosae(
+  data      = simulated_sae,
+  formula   = y ~ x1 + x2,
+  vardir    = vardir,
+  nonlinear = "x3",
+  spatial   = c("lat", "lon"),
+  compare   = TRUE,
+  B         = 50,
+  seed      = 1
+)
+
+summary(fit)
+
+head(fit$estimation)
+
+fit$parameters
+
+fit$diagnostics
+
+fit$comparison
+```
+
+This workflow combines linear, nonlinear, and spatial modelling within an area-level SAE framework while also providing uncertainty estimation through parametric bootstrap and optional comparison with conventional Fay-Herriot models.

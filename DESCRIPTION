@@ -1,7 +1,7 @@
 Package: geoaddSAE2
 Type: Package
 Title: Geoadditive Small Area Estimation for Area-Level Model
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(
     person(
       given = "Amalyah Rizky Khairunnisa", 
@@ -32,16 +32,16 @@ Description: Fits area-level geoadditive small area estimation (SAE)
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
-Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
+Suggests: knitr, rmarkdown, sae, spdep, testthat (>= 3.0.0)
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Depends: R (>= 3.5.0)
-Imports: mgcv, sae, stats
+Imports: mgcv, stats
 Config/roxygen2/version: 8.1.0
 NeedsCompilation: no
-Packaged: 2026-10-04 14:51:46 UTC; alya
+Packaged: 2026-10-15 18:12:37 UTC; alya
 Author: Amalyah Rizky Khairunnisa Sutarto [aut, cre],
   Novi Hidayat Pusponegoro [aut, ths]
 Maintainer: Amalyah Rizky Khairunnisa Sutarto <222212489@stis.ac.id>
 Repository: CRAN
-Date/Publication: 2026-10-05 07:30:02 UTC
+Date/Publication: 2026-10-15 19:20:02 UTC

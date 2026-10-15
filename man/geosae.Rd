@@ -2,7 +2,7 @@
 % Please edit documentation in R/geoadditive.R
 \name{geosae}
 \alias{geosae}
-\title{Fit an area-level Geoadditive Small Area Estimation model}
+\title{Fit an Area-Level Geoadditive Small Area Estimation Model}
 \usage{
 geosae(
   data,
@@ -21,38 +21,75 @@ geosae(
 )
 }
 \arguments{
-\item{data}{A data frame containing the direct estimates, the known sampling variances, the covariates, and (if used) spatial coordinates.}
+\item{data}{A data frame containing the direct estimates, known sampling variances, covariates, and spatial coordinates.}
 
-\item{formula}{A model formula \code{y ~ x1 + x2} giving the response (direct estimator) on the left-hand side and the *linear* covariates on the right-hand side. Use \code{y ~ 1} if there are no linear covariates.}
+\item{formula}{A model formula giving the response variable on the left-hand side and covariates to be modelled linearly on the right-hand side. Use \code{y ~ 1} if no linear covariates are used.}
 
-\item{vardir}{Unquoted name of the column in \code{data} holding the known sampling variances of the direct estimator (e.g. \code{vardir = vardir}).}
+\item{vardir}{Unquoted name of the column containing the known sampling variances of the direct estimates.}
 
-\item{nonlinear}{Character vector of covariate names to be modelled nonlinearly with a P-spline.}
+\item{nonlinear}{Character vector containing the names of covariates to be modelled nonlinearly using P-splines.}
 
-\item{spatial}{Character vector of length 2 giving the names of the two spatial coordinate columns (e.g. \code{c("lat", "lon")}).}
+\item{spatial}{Character vector of length two containing the names of the spatial coordinate variables, for example \code{c("lat", "lon")}.}
 
-\item{knots}{Optional. Controls the basis dimension (number of knots) of each nonlinear P-spline term. \code{NULL} (default) uses an automatic rule of thumb following Ruppert (2002).}
+\item{knots}{Optional basis dimension for the nonlinear P-spline terms. If \code{NULL}, the basis dimension is selected automatically.}
 
-\item{spatial_k}{Optional basis dimension for the spatial thin-plate smooth. \code{NULL} uses \pkg{mgcv}'s default.}
+\item{spatial_k}{Optional basis dimension for the spatial thin plate regression spline. If \code{NULL}, the default from \pkg{mgcv} is used.}
 
-\item{method}{Smoothing-parameter selection method passed to \code{mgcv::gam} (and to the \pkg{sae} comparison models when \code{compare = TRUE}). Default \code{"REML"}.}
+\item{method}{Smoothing-parameter estimation method passed to \code{mgcv::gam}. Currently, \code{"REML"} is used by default.}
 
-\item{compare}{Logical. If \code{FALSE} (default), only the geoadditive model is fitted. If \code{TRUE}, comparison models are fitted and a comparison table (model | mse | rmse) is returned.}
+\item{compare}{Logical. If \code{TRUE}, Fay-Herriot and Spatial Fay-Herriot comparison models are also fitted. These comparison models require the optional \pkg{sae} package.}
 
-\item{proxmat}{Optional spatial proximity matrix for the Spatial Fay-Herriot model. The matrix should have one row and one column for each area, with zero diagonal and row-standardized spatial weights. If \code{NULL} and \code{compare = TRUE} with \code{spatial} specified, the matrix is constructed automatically using k-nearest neighbours based on the spatial coordinates.}
+\item{proxmat}{Optional spatial proximity matrix used by the Spatial Fay-Herriot comparison model.}
 
-\item{proxmat_k}{Number of nearest neighbours used to construct the automatic spatial proximity matrix when \code{proxmat = NULL}. Default is 4.}
+\item{proxmat_k}{Number of nearest neighbours used when constructing the spatial proximity matrix automatically. Default is 4.}
 
-\item{B}{Number of parametric bootstrap replicates. Default 100.}
+\item{B}{Number of parametric bootstrap replications used to estimate the MSE. Default is 100.}
 
-\item{seed}{Optional integer seed for the bootstrap, for reproducibility.}
+\item{seed}{Optional integer seed for reproducibility.}
 }
 \value{
-An object of class \code{"geosae"}, a list containing the call, settings, estimation results, diagnostics, fixed-effect parameters, model comparisons (if requested), and underlying fitted model objects.
+An object of class \code{"geosae"}. The returned list contains area-level estimates, model diagnostics, fixed-effect parameter estimates, model comparisons when requested, and the underlying fitted model objects.
 }
 \description{
-Fits area-level Geoadditive Small Area Estimation (SAE) models: a extension of the Fay-Herriot model that represents nonlinear covariate effects with and spatial variation, estimated by REML within a linear mixed model framework (via \pkg{mgcv}), with Mean Squared Error obtained by parametric bootstrap. The package also lets users compare the geoadditive model against the classical Fay-Herriot and Spatial Fay-Herriot models, both of which are provided by, and fitted with, the existing \pkg{sae} package.
+Fits area-level Geoadditive Small Area Estimation (SAE) models, an extension of the Fay-Herriot model that incorporates linear covariate effects, nonlinear covariate effects represented by penalized splines, and spatial variation represented by a bivariate thin plate regression spline.
 }
 \details{
-Optionally (\code{compare = TRUE}), the classical Fay-Herriot and Spatial Fay-Herriot models are also fitted -- using the existing, well-tested implementations in the \pkg{sae} package (\code{sae::mseFH}, \code{sae::eblupSFH}, \code{sae::mseSFH}) rather than re-implemented here -- so that all three models can be compared side by side.
+Model parameters and smoothing parameters are estimated by Restricted Maximum Likelihood (REML) within a linear mixed model framework using \pkg{mgcv}. The Mean Squared Error (MSE) of the Geoadditive SAE estimates is estimated using parametric bootstrap.
+
+When \code{compare = TRUE}, the function also fits the classical Fay-Herriot and Spatial Fay-Herriot models using implementations provided by the optional \pkg{sae} package. The \pkg{sae} package is not required when \code{compare = FALSE}.
+}
+\examples{
+\donttest{
+data(simulated_sae)
+
+fit <- geosae(
+  data      = simulated_sae,
+  formula   = y ~ x1 + x2,
+  vardir    = vardir,
+  nonlinear = "x3",
+  spatial   = c("lat", "lon"),
+  B         = 10,
+  seed      = 1
+)
+
+fit
+summary(fit)
+head(fit$estimation)
+}
+
+\dontrun{
+fit_cmp <- geosae(
+  data      = simulated_sae,
+  formula   = y ~ x1 + x2,
+  vardir    = vardir,
+  nonlinear = "x3",
+  spatial   = c("lat", "lon"),
+  compare   = TRUE,
+  B         = 100,
+  seed      = 1
+)
+
+fit_cmp$comparison
+}
+
 }

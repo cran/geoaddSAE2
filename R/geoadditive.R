@@ -52,10 +52,8 @@ build_proxmat <- function(coords, k = 4) {
     stop("At least one area has no spatial neighbours.", call. = FALSE)
   }
 
-  # Row-standardization
   W <- W / rs
 
-  # Final checks
   if (any(!is.finite(W))) {
     stop("The resulting proximity matrix contains non-finite values.", call. = FALSE)
   }
@@ -66,7 +64,7 @@ build_proxmat <- function(coords, k = 4) {
 #' Default number of knots (Ruppert's rule of thumb)
 #' @keywords internal
 #' @noRd
-default_num_knots <- function(x, min_knots = 3, max_knots = 35) {
+default_num_knots <- function(x, max_knots = 35) {
   nu <- length(unique(x[!is.na(x)]))
   k <- round(0.25 * nu)
   k <- min(k, max_knots)
@@ -113,15 +111,7 @@ default_num_knots <- function(x, min_knots = 3, max_knots = 35) {
     rhs_parts <- c(rhs_parts, spatial_term)
   }
 
-  if (length(rhs_parts) == 0) rhs_parts <- "1"
-
   stats::as.formula(paste(response, "~", paste(rhs_parts, collapse = " + ")))
-}
-
-#' @keywords internal
-#' @noRd
-.fmt <- function(x, digits = 4) {
-  formatC(x, format = "f", digits = digits)
 }
 
 #' @keywords internal
@@ -148,7 +138,8 @@ default_num_knots <- function(x, min_knots = 3, max_knots = 35) {
     sp_idx <- sm$first.sp:sm$last.sp
 
     S <- matrix(0, length(idx), length(idx))
-    for (j in seq_along(sm$S)) S <- S + fit$sp[[sp_idx[j]]] * sm$S[[j]]
+    for (j in seq_along(sm$S))
+      S <- S + fit$sp[[sp_idx[j]]] * sm$S[[j]]
     S <- (S + t(S)) / 2
 
     eg  <- eigen(S, symmetric = TRUE)
@@ -159,7 +150,7 @@ default_num_knots <- function(x, min_knots = 3, max_knots = 35) {
       idx   = idx,
       Vp    = eg$vectors[, pos, drop = FALSE],
       sd    = 1 / sqrt(eg$values[pos]),
-      fixed = as.vector(V0 %*% crossprod(V0, coefs[idx]))  # unpenalised part
+      fixed = as.vector(V0 %*% crossprod(V0, coefs[idx]))
     )
   })
 }
@@ -167,8 +158,7 @@ default_num_knots <- function(x, min_knots = 3, max_knots = 35) {
 #' @keywords internal
 #' @noRd
 .bootstrap_mse_geoadditive <- function(fit, data, response, vardir_name,
-                                       gam_formula, method, B = 100, seed = NULL,
-                                       verbose = FALSE) {
+                                       gam_formula, method, B = 100, seed = NULL) {
   if (!is.null(seed)) set.seed(seed)
 
   n          <- nrow(data)
@@ -208,27 +198,63 @@ default_num_knots <- function(x, min_knots = 3, max_knots = 35) {
   list(mse = rowMeans(sq_err, na.rm = TRUE), n_fail = n_fail, B = B)
 }
 
-#' Fit an area-level Geoadditive Small Area Estimation model
+#' Fit an Area-Level Geoadditive Small Area Estimation Model
 #'
-#' Fits area-level Geoadditive Small Area Estimation (SAE) models: a extension of the Fay-Herriot model that represents nonlinear covariate effects with and spatial variation, estimated by REML within a linear mixed model framework (via \pkg{mgcv}), with Mean Squared Error obtained by parametric bootstrap. The package also lets users compare the geoadditive model against the classical Fay-Herriot and Spatial Fay-Herriot models, both of which are provided by, and fitted with, the existing \pkg{sae} package.
+#' Fits area-level Geoadditive Small Area Estimation (SAE) models, an extension of the Fay-Herriot model that incorporates linear covariate effects, nonlinear covariate effects represented by penalized splines, and spatial variation represented by a bivariate thin plate regression spline.
 #'
-#' Optionally (\code{compare = TRUE}), the classical Fay-Herriot and Spatial Fay-Herriot models are also fitted -- using the existing, well-tested implementations in the \pkg{sae} package (\code{sae::mseFH}, \code{sae::eblupSFH}, \code{sae::mseSFH}) rather than re-implemented here -- so that all three models can be compared side by side.
+#' Model parameters and smoothing parameters are estimated by Restricted Maximum Likelihood (REML) within a linear mixed model framework using \pkg{mgcv}. The Mean Squared Error (MSE) of the Geoadditive SAE estimates is estimated using parametric bootstrap.
 #'
-#' @param data A data frame containing the direct estimates, the known sampling variances, the covariates, and (if used) spatial coordinates.
-#' @param formula A model formula \code{y ~ x1 + x2} giving the response (direct estimator) on the left-hand side and the *linear* covariates on the right-hand side. Use \code{y ~ 1} if there are no linear covariates.
-#' @param vardir Unquoted name of the column in \code{data} holding the known sampling variances of the direct estimator (e.g. \code{vardir = vardir}).
-#' @param nonlinear Character vector of covariate names to be modelled nonlinearly with a P-spline.
-#' @param spatial Character vector of length 2 giving the names of the two spatial coordinate columns (e.g. \code{c("lat", "lon")}).
-#' @param knots Optional. Controls the basis dimension (number of knots) of each nonlinear P-spline term. \code{NULL} (default) uses an automatic rule of thumb following Ruppert (2002).
-#' @param spatial_k Optional basis dimension for the spatial thin-plate smooth. \code{NULL} uses \pkg{mgcv}'s default.
-#' @param method Smoothing-parameter selection method passed to \code{mgcv::gam} (and to the \pkg{sae} comparison models when \code{compare = TRUE}). Default \code{"REML"}.
-#' @param compare Logical. If \code{FALSE} (default), only the geoadditive model is fitted. If \code{TRUE}, comparison models are fitted and a comparison table (model | mse | rmse) is returned.
-#' @param proxmat Optional spatial proximity matrix for the Spatial Fay-Herriot model. The matrix should have one row and one column for each area, with zero diagonal and row-standardized spatial weights. If \code{NULL} and \code{compare = TRUE} with \code{spatial} specified, the matrix is constructed automatically using k-nearest neighbours based on the spatial coordinates.
-#' @param proxmat_k Number of nearest neighbours used to construct the automatic spatial proximity matrix when \code{proxmat = NULL}. Default is 4.
-#' @param B Number of parametric bootstrap replicates. Default 100.
-#' @param seed Optional integer seed for the bootstrap, for reproducibility.
+#' When \code{compare = TRUE}, the function also fits the classical Fay-Herriot and Spatial Fay-Herriot models using implementations provided by the optional \pkg{sae} package. The \pkg{sae} package is not required when \code{compare = FALSE}.
 #'
-#' @returns An object of class \code{"geosae"}, a list containing the call, settings, estimation results, diagnostics, fixed-effect parameters, model comparisons (if requested), and underlying fitted model objects.
+#' @param data A data frame containing the direct estimates, known sampling variances, covariates, and spatial coordinates.
+#' @param formula A model formula giving the response variable on the left-hand side and covariates to be modelled linearly on the right-hand side. Use \code{y ~ 1} if no linear covariates are used.
+#' @param vardir Unquoted name of the column containing the known sampling variances of the direct estimates.
+#' @param nonlinear Character vector containing the names of covariates to be modelled nonlinearly using P-splines.
+#' @param spatial Character vector of length two containing the names of the spatial coordinate variables, for example \code{c("lat", "lon")}.
+#' @param knots Optional basis dimension for the nonlinear P-spline terms. If \code{NULL}, the basis dimension is selected automatically.
+#' @param spatial_k Optional basis dimension for the spatial thin plate regression spline. If \code{NULL}, the default from \pkg{mgcv} is used.
+#' @param method Smoothing-parameter estimation method passed to \code{mgcv::gam}. Currently, \code{"REML"} is used by default.
+#' @param compare Logical. If \code{TRUE}, Fay-Herriot and Spatial Fay-Herriot comparison models are also fitted. These comparison models require the optional \pkg{sae} package.
+#' @param proxmat Optional spatial proximity matrix used by the Spatial Fay-Herriot comparison model.
+#' @param proxmat_k Number of nearest neighbours used when constructing the spatial proximity matrix automatically. Default is 4.
+#' @param B Number of parametric bootstrap replications used to estimate the MSE. Default is 100.
+#' @param seed Optional integer seed for reproducibility.
+#'
+#' @returns An object of class \code{"geosae"}. The returned list contains area-level estimates, model diagnostics, fixed-effect parameter estimates, model comparisons when requested, and the underlying fitted model objects.
+#'
+#' @examples
+#' \donttest{
+#' data(simulated_sae)
+#'
+#' fit <- geosae(
+#'   data      = simulated_sae,
+#'   formula   = y ~ x1 + x2,
+#'   vardir    = vardir,
+#'   nonlinear = "x3",
+#'   spatial   = c("lat", "lon"),
+#'   B         = 10,
+#'   seed      = 1
+#' )
+#'
+#' fit
+#' summary(fit)
+#' head(fit$estimation)
+#' }
+#'
+#' \dontrun{
+#' fit_cmp <- geosae(
+#'   data      = simulated_sae,
+#'   formula   = y ~ x1 + x2,
+#'   vardir    = vardir,
+#'   nonlinear = "x3",
+#'   spatial   = c("lat", "lon"),
+#'   compare   = TRUE,
+#'   B         = 100,
+#'   seed      = 1
+#' )
+#'
+#' fit_cmp$comparison
+#' }
 #'
 #' @export
 geosae <- function(data,
@@ -269,7 +295,7 @@ geosae <- function(data,
 
   linear_terms <- attr(stats::terms(formula), "term.labels")
 
-  if (is.null(nonlinear) || length(nonlinear) == 0) {
+  if (missing(nonlinear) || is.null(nonlinear) || length(nonlinear) == 0L) {
     stop("`nonlinear` must contain at least one covariate for the Geoadditive SAE model.", call. = FALSE)
   }
 
@@ -285,8 +311,8 @@ geosae <- function(data,
     stop("Variable(s) listed in both `formula` and `nonlinear`: ", paste(overlap, collapse = ", "), ". Remove them from `formula` if they should be modelled nonlinearly.", call. = FALSE)
   }
 
-  if (is.null(spatial) || length(spatial) != 2) {
-    stop("`spatial` must be a character vector of length 2, e.g. c(\"lat\", \"lon\").", call. = FALSE)
+  if (missing(spatial) || is.null(spatial) || length(spatial) != 2L) {
+    stop(" spatial` must be a character vector of length 2, e.g. c(\"lat\", \"lon\").", call. = FALSE)
   }
 
   spatial <- as.character(spatial)
@@ -339,9 +365,7 @@ geosae <- function(data,
 
   # Estimate Model
   fit <- .fit_geoadditive_gam(data, gam_formula, vardir_name, method)
-
-  # Extract point estimate and analytical standard error
-  pred <- stats::predict(fit, se.fit = TRUE)
+  pred <- stats::predict(fit,se.fit = TRUE)
   point_est <- as.numeric(pred$fit)
 
   mse_geo <- rep(NA_real_, nrow(data))
@@ -417,13 +441,19 @@ geosae <- function(data,
   comparison <- NULL
   cmp_formula <- NULL
 
-  if (isTRUE(compare)) {
-    cmp_formula <- stats::reformulate(c(linear_terms, nonlinear),
-                                      response = response)
+  if (isTRUE(compare) && !requireNamespace("sae", quietly = TRUE)) {
+    stop(
+      "Package `sae` is required when `compare = TRUE`. ",
+      "Please install `sae` to use the Fay-Herriot and ",
+      "Spatial Fay-Herriot comparison models.",
+      call. = FALSE
+    )
+  }
 
+  if (isTRUE(compare)) {
+    cmp_formula <- stats::reformulate(c(linear_terms, nonlinear), response = response)
     rows <- list()
-    rows$direct <- .comparison_row("Direct Estimate", data[[response]],
-                                   data[[vardir_name]])
+    rows$direct <- .comparison_row("Direct Estimate", data[[response]], data[[vardir_name]])
 
     # Fay-Herriot
     fh_res <- .fit_fh(cmp_formula, vardir_name, data, method = method)

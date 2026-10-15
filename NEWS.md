@@ -12,3 +12,7 @@
 * Fixed calculation of parametric bootstrap MSE.
 * Improved input validation in `geosae()`.
 * Updated documentation and examples.
+
+# geoaddSAE2 0.1.2
+
+* Update description due to sae dependency

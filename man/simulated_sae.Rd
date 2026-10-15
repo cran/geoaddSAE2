@@ -30,7 +30,7 @@ The data are generated using the following steps:
 \enumerate{
   \item The population consists of 100 small areas, and a seed is set to ensure reproducibility of the simulated data.
   \item Two-dimensional spatial coordinates are generated for each area, where latitude is generated from \eqn{U(-11, 6)} and longitude is generated from \eqn{U(95, 141)}.
-  \item Two linear auxiliary variables are generated for each area: \eqn{x1 ~ Bernoulli(0.9)} and \eqn{x2 ~ U(1, 5)}. A nonlinear auxiliary variable \eqn{x3 ~ U(1, 5)} is also generated.
+  \item Two linear auxiliary variables are generated for each area: \eqn{x1 ~ Bernoulli(0.5)} and \eqn{x2 ~ U(1, 5)}. A nonlinear auxiliary variable \eqn{x3 ~ U(1, 5)} is also generated.
   \item The model parameters are set deterministically as \eqn{\alpha = 0.5}, \eqn{\beta_1 = 1}, and \eqn{\beta_2 = 1}.
   \item The nonlinear covariate effect is generated using \eqn{g(x3) = x3^2}.
   \item A continuous spatial effect is generated from the spatial coordinates using the smooth function \eqn{h(lat, lon) = sin(lat) + cos(lon)}.
